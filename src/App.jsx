@@ -157,7 +157,7 @@ const kerningTable = {
 };
 
 export default function App() {
-  const [text, setText] = useState('Your Name')
+  const [text, setText] = useState('preview')
   const [theme, setTheme] = useState('anime')
   const [specific, setSpecific] = useState('naruto')
   const [variant, setVariant] = useState('')
@@ -633,6 +633,7 @@ export default function App() {
           label="Your Text"
           value={text}
           onChange={(e) => setText(e.target.value)}
+          onFocus={() => { if (text === 'preview') setText('') }}
           inputProps={{ maxLength: 32 }}
         />
 

@@ -1,41 +1,41 @@
 @font-face {
   font-family: 'db';
-  src: url('/fonts/db.ttf') format('truetype');
+  src: url('/previewer/fonts/db.ttf') format('truetype');
   font-display: swap;
 }
 @font-face {
   font-family: 'ONEPIECE_IL_FINAL';
-  src: url('/fonts/ONEPIECE_IL_FINAL.ttf') format('truetype');
+  src: url('/previewer/fonts/ONEPIECE_IL_FINAL.ttf') format('truetype');
   font-display: swap;
 }
 @font-face {
   font-family: 'AnimeFont';
-  src: url('/fonts/AnimeFont.ttf') format('truetype');
+  src: url('/previewer/fonts/AnimeFont.ttf') format('truetype');
   font-display: swap;
 }
 @font-face {
   font-family: 'Metallica_ILL';
-  src: url('/fonts/Metallica_ILL.ttf') format('truetype');
+  src: url('/previewer/fonts/Metallica_ILL.ttf') format('truetype');
   font-display: swap;
 }
 @font-face {
   font-family: 'Metal_Lord_Neww';
-  src: url('/fonts/Metal_Lord_Neww.ttf') format('truetype');
+  src: url('/previewer/fonts/Metal_Lord_Neww.ttf') format('truetype');
   font-display: swap;
 }
 @font-face {
   font-family: 'Shredded_IL';
-  src: url('/fonts/Shredded_IL.ttf') format('truetype');
+  src: url('/previewer/fonts/Shredded_IL.ttf') format('truetype');
   font-display: swap;
 }
 @font-face {
   font-family: 'Megadeth_IL';
-  src: url('/fonts/Megadeth_IL2.ttf') format('truetype');
+  src: url('/previewer/fonts/Megadeth_IL2.ttf') format('truetype');
   font-display: swap;
 }
 @font-face {
   font-family: 'ShowFont';
-  src: url('/fonts/ShowFont.ttf') format('truetype');
+  src: url('/previewer/fonts/ShowFont.ttf') format('truetype');
   font-display: swap;
 }
 
