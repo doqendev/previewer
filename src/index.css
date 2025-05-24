@@ -2,6 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'Metallica_ILL';
+  src: url('/fonts/Metallica_ILL.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Shredded_IL';
+  src: url('/fonts/Shredded_IL.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Metal_Lord_Neww';
+  src: url('/fonts/Metal_Lord_Neww.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Megadeth_IL';
+  src: url('/fonts/Megadeth_IL2.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;

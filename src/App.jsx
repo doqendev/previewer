@@ -418,6 +418,7 @@ export default function App() {
 
       // Band: Metallica
       if (theme === 'band' && specific === 'metallica') {
+        await document.fonts.load('bold 70px Metallica_ILL')
         ctx.save()
         ctx.font = 'bold 70px Metallica_ILL, sans-serif'
         ctx.textAlign = 'center'
@@ -437,6 +438,7 @@ export default function App() {
 
       // Band: Pantera
       if (theme === 'band' && specific === 'pantera') {
+        await document.fonts.load('bold 120px Shredded_IL')
         ctx.save()
         ctx.font = 'bold 120px Shredded_IL, sans-serif'
         ctx.textAlign = 'center'
@@ -456,6 +458,7 @@ export default function App() {
 
       // Band: Iron Maiden
       if (theme === 'band' && specific === 'ironmaiden') {
+        await document.fonts.load('bold 70px Metal_Lord_Neww')
         ctx.save()
         ctx.font = 'bold 70px Metal_Lord_Neww, sans-serif'
         ctx.textAlign = 'center'
