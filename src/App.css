@@ -8,11 +8,7 @@
   src: url('/previewer/fonts/ONEPIECE_IL_FINAL.ttf') format('truetype');
   font-display: swap;
 }
-@font-face {
-  font-family: 'AnimeFont';
-  src: url('/previewer/fonts/AnimeFont.ttf') format('truetype');
-  font-display: swap;
-}
+
 @font-face {
   font-family: 'Metallica_ILL';
   src: url('/previewer/fonts/Metallica_ILL.ttf') format('truetype');
@@ -31,11 +27,6 @@
 @font-face {
   font-family: 'Megadeth_IL';
   src: url('/previewer/fonts/Megadeth_IL2.ttf') format('truetype');
-  font-display: swap;
-}
-@font-face {
-  font-family: 'ShowFont';
-  src: url('/previewer/fonts/ShowFont.ttf') format('truetype');
   font-display: swap;
 }
 
