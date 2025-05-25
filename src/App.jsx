@@ -361,7 +361,7 @@ export default function App() {
         if (highlightIdx === -1) highlightIdx = txt.length > 1 ? txt.length - 2 : 0
 
         // per-letter height adjustments (e.g., shrink 'C')
-        const HEIGHT_ADJ = { C: 0.95, S: 0.95, O: 1.05 }
+        const HEIGHT_ADJ = { C: 0.95, S: 0.95, O: 1.05, A: 0.97, E: 0.95 }
 
         // center the group horizontally: border, left image, then text
         if (charPositions.length > 0) {
