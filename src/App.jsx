@@ -17,10 +17,10 @@ import {
   AccordionDetails,
 } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import dballRing from './assets/dball.png'
-import ThreeDPreview from './ThreeDPreview.jsx'
-import customBgImgSrc from './assets/background.jpg'; // Import the new background image
-import customBg2 from './assets/background2.jpg'; // Secondary background when >6 letters in One Piece
+import { CANVAS_W, CANVAS_H, LOGO_OFFSET_Y, CUSTOM_BG_MAIN } from './previewConfig';
+import { drawDragonBall } from './DragonBallPreview.jsx';
+import { drawOnePiece } from './OnePiecePreview.jsx';
+import { drawBand } from './BandPreview.jsx';
 
 // map internal fontFamily names to Drei Text3D JSON files
 const FONT_JSON_MAP = {
@@ -125,13 +125,6 @@ const PRODUCT_PAGE_URLS = {
   strangerthings: 'https://example.com/stranger-things-logo',
 }
 
-const CANVAS_W = 800
-const CANVAS_H = 300
-const DB_RING_SRC = dballRing
-const KERNING = { CO: -10, AS: -8, ZA: -18 }
-// letter width adjustments for Dragon Ball theme
-const WIDTH_ADJ = { D: 1.6, Z: 0.8 }
-
 export default function App() {
   const [text, setText] = useState('preview')
   const [use3D, setUse3D] = useState(false)
@@ -143,12 +136,6 @@ export default function App() {
   const [useCustomBackground, setUseCustomBackground] = useState(false);
   // Vertical offset for all logos; adjust this value in code as needed
   const LOGO_OFFSET_Y = 0;
-  // Scale factors for One Piece logo
-  const ONEPIECE_SCALE_NORMAL = 0.95;
-  const ONEPIECE_SCALE_SMALL = 0.8;
-  // Y offsets for One Piece logo based on size
-  const ONEPIECE_OFFSET_Y_NORMAL = LOGO_OFFSET_Y;
-  const ONEPIECE_OFFSET_Y_SMALL = LOGO_OFFSET_Y + 30;
 
   const currentTheme = THEMES.find((t) => t.value === theme)
   const currentSpecific = currentTheme.options.find((o) => o.value === specific)
@@ -165,244 +152,31 @@ export default function App() {
 
   useEffect(() => {
     const draw = async () => {
-      const canvas = canvasRef.current
-      if (!canvas) return
-      const ctx = canvas.getContext('2d')
-      ctx.clearRect(0, 0, CANVAS_W, CANVAS_H)
-
+      const canvas = canvasRef.current; if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+      // Delegate to specialized previews
+      if (theme === 'anime' && specific === 'dragonball') {
+        await drawDragonBall(ctx, text, useCustomBackground);
+        return;
+      }
+      if (theme === 'anime' && specific === 'onepiece') {
+        await drawOnePiece(ctx, text, variant, useCustomBackground);
+        return;
+      }
+      // Band logo previews
+      if (theme === 'band') {
+        await drawBand(ctx, specific, text);
+        return;
+      }
+      // Generic custom background
       if (useCustomBackground) {
         const bg = new Image();
-        // Choose secondary background2 for One Piece text longer than 6
-        const bgSrc = theme === 'anime' && specific === 'onepiece' && text.replace(/\s/g, '').length > 6
-          ? customBg2
-          : customBgImgSrc;
-        bg.src = bgSrc;
-        await new Promise(r => bg.onload = r)
-        // Draw background without any transforms to avoid resizing
-        ctx.save()
-        ctx.setTransform(1, 0, 0, 1, 0, 0)
-        ctx.drawImage(bg, 0, 0, CANVAS_W, CANVAS_H)
-        ctx.restore()
-      }
-
-      // Dragon Ball preview
-      if (theme === 'anime' && specific === 'dragonball') {
-        ctx.save();
-        ctx.translate(0, LOGO_OFFSET_Y);
-        // DRAGONBALL CANVAS RENDERING
-        await document.fonts.load('100px db')
-        ctx.save()
-        // Prepare text
-        const t = text.toUpperCase()
-        ctx.font = '100px db, sans-serif'
-        ctx.textBaseline = 'alphabetic'
-        ctx.textAlign = 'left'
-        ctx.lineJoin = 'round'
-        ctx.lineCap = 'round'
-
-        // Measure letters with custom widths
-        const letters = t.split('').map((L) => {
-          const measured = ctx.measureText(L).width
-          const factor = WIDTH_ADJ[L] || 1
-          return { L, measured, factor, effective: measured * factor }
-        })
-        const n = letters.length
-        const half = Math.ceil(n / 2)
-
-        // Compute centering parameters
-        const totalLettersWidth = letters.reduce((sum, { effective }) => sum + effective, 0)
-        const ballSize = 60
-        const letterSpacing = 5  // additional spacing between letters
-        // center total width including full ball size and inter-letter spacing
-        const totalWidth = totalLettersWidth + ballSize + letterSpacing * (n - 1)
-        const xStart = (CANVAS_W - totalWidth) / 2
-        // compute vertical centering based on font metrics
-        const sampleMetrics = ctx.measureText('M')
-        const ascent = sampleMetrics.actualBoundingBoxAscent
-        const descent = sampleMetrics.actualBoundingBoxDescent
-        const baselineY = (CANVAS_H + ascent - descent) / 2
-        const yPos = baselineY
-
-        // Build positions for first half
-        const positions = []
-        let x = xStart
-        for (let i = 0; i < half; i++) {
-          if (i > 0) x += KERNING[t[i - 1] + t[i]] || 0
-          const { L, factor, effective } = letters[i]
-          const d = Math.min(i, n - 1 - i)
-          const scale = Math.max(1 - d * 0.05, 0.5)
-          const fillColor = '#ffff00'
-          positions.push({ L, x, factor, scale, fillColor, effective })
-          x += effective + letterSpacing
-        }
-
-        // Insert half-ball overlap: move by half the ball size
-        x += ballSize / 2
-
-        // Build positions for second half
-        for (let i = half; i < n; i++) {
-          if (i > half) x += KERNING[t[i - 1] + t[i]] || 0
-          const { L, factor, effective } = letters[i]
-          const d = Math.min(i, n - 1 - i)
-          const scale = Math.max(1 - d * 0.05, 0.5)
-          const fillColor = '#ff0000'
-          positions.push({ L, x, factor, scale, fillColor, effective })
-          x += effective + letterSpacing
-        }
-
-        // Draw all letters
-        for (const pos of positions) {
-          ctx.save()
-          ctx.translate(pos.x, yPos)
-          ctx.scale(pos.factor, pos.scale)
-          ctx.strokeStyle = '#161616'
-          ctx.lineWidth = 15 / pos.scale
-          ctx.strokeText(pos.L, 0, 0)
-          ctx.fillStyle = pos.fillColor
-          ctx.fillText(pos.L, 0, 0)
-          ctx.restore()
-        }
-
-        // Draw ring on top
-        const img = new Image()
-        img.src = DB_RING_SRC
-        await new Promise((res) => (img.onload = res))
-        // position ring so half overlaps red and yellow segments
-        const ringX = positions[half - 1].x + positions[half - 1].effective - ballSize / 2
-        // vertically center ring between text topline and baseline
-        const ringCenterY = yPos - ascent / 2
-        const ringY = ringCenterY - ballSize / 2
-        ctx.drawImage(img, ringX +15, ringY+5, ballSize, ballSize)
-        
-        ctx.restore()
-        return
-      }
-
-      // Anime: One Piece character preview
-      if (theme === 'anime' && specific === 'onepiece') {
-        await document.fonts.load('bold 50px ONEPIECE_IL_FINAL')
-        const cfg = ONEPIECE_STYLE_CONFIGS[variant] || ONEPIECE_STYLE_CONFIGS.char1
-        const primaryColor = cfg.defaultSecondaryColor
-        const secondaryColor = cfg.defaultPrimaryColor
-        const txt = text.toUpperCase().substring(0, 12)
-        const maxFontSize = Math.min(400, CANVAS_H * 0.5)
-        const baseFontSize = txt.length > 11 ? maxFontSize * 0.7 : maxFontSize
-        const fontSize = baseFontSize
-        
-        const off = document.createElement('canvas')
-        off.width = CANVAS_W
-        off.height = CANVAS_H
-        const offCtx = off.getContext('2d')
-        // If custom background is used for main canvas, make offscreen bg transparent for One Piece
-        // otherwise, use its default white bg for the offscreen canvas before extrude.
-        if (!useCustomBackground) { // Only fill white if no global custom background, to allow wall.jpg to show later
-            offCtx.fillStyle = '#fff' 
-            offCtx.fillRect(0, 0, off.width, off.height)
-        } else {
-            offCtx.clearRect(0,0,off.width, off.height) // Keep offscreen transparent if global bg is used
-        }
-
-        const boxImg = new Image()
-        boxImg.src = new URL(`./assets/${cfg.boxFilename}`, import.meta.url).href
-        await new Promise(r => boxImg.onload = r)
-        const bxH = (425 / 800) * CANVAS_H
-        const bxY = CANVAS_H - bxH - (160 / 800) * CANVAS_H
-        const mainH = CANVAS_H * 0.5
-        const styleScale = cfg.styleScale ?? 1
-        const widthScale = cfg.styleWidthScale ?? styleScale
-        const imgWidth = mainH * widthScale
-        const imgHeight = mainH * styleScale
-        const styleImg = new Image()
-        styleImg.src = new URL(`./assets/${cfg.defaultStyleImage}`, import.meta.url).href
-        await new Promise(r => styleImg.onload = r)
-        offCtx.font = `${fontSize}px ONEPIECE_IL_FINAL`
-        offCtx.textBaseline = 'middle'
-        offCtx.textAlign = 'left'
-        offCtx.lineJoin = 'round'
-        offCtx.lineWidth = (15 * fontSize) / 400
-        
-        const textPadding = -10 / 800 * CANVAS_W
-        let x = imgWidth + textPadding
-        const y = bxY + bxH / 2
-        const charPositions = []
-        for (let i = 0; i < txt.length; i++) {
-          charPositions.push({ c: txt[i], x, idx: i })
-          const w = offCtx.measureText(txt[i]).width
-          x += w - 8
-        }
-        const eIndices = charPositions.filter(p => p.c === 'E').map(p => p.idx)
-        const iIndices = charPositions.filter(p => p.c === 'I').map(p => p.idx)
-        let highlightIdx = -1
-        if (eIndices.length === 1 && iIndices.length === 0) highlightIdx = eIndices[0]
-        else if (iIndices.length === 1 && eIndices.length === 0) highlightIdx = iIndices[0]
-        else if (iIndices.length === 1 && eIndices.length === 1) highlightIdx = iIndices[0]
-        else if (eIndices.length > 1 || iIndices.length > 1) {
-          const lastE = eIndices.length > 0 ? eIndices[eIndices.length - 1] : -1
-          const lastI = iIndices.length > 0 ? iIndices[iIndices.length - 1] : -1
-          highlightIdx = Math.max(lastE, lastI)
-        }
-        if (highlightIdx === -1) highlightIdx = txt.length > 1 ? txt.length - 2 : 0
-        const HEIGHT_ADJ = { C: 0.95, S: 0.95, O: 1.05, A: 0.97, E: 0.95 }
-
-        if (charPositions.length > 0) {
-          const lastChar = charPositions[charPositions.length - 1]
-          const wLast = offCtx.measureText(lastChar.c).width
-          const textEnd = lastChar.x + wLast
-          const startX = (CANVAS_W - textEnd) / 2
-          offCtx.save()
-          offCtx.translate(startX, 0)
-          offCtx.drawImage(boxImg, 0, bxY, textEnd + 45, bxH) // Adjusted box width
-          const imgY = (CANVAS_H - imgHeight) / 2
-          offCtx.drawImage(styleImg, 0, imgY, imgWidth, imgHeight)
-          offCtx.strokeStyle = '#000'
-          for (let {c, x: cx, idx} of charPositions) {
-            const scaleY = HEIGHT_ADJ[c] || 1
-            offCtx.save()
-            offCtx.translate(0, y)
-            offCtx.scale(1, scaleY)
-            offCtx.translate(0, -y)
-            offCtx.strokeText(c, cx, y)
-            offCtx.fillStyle = idx === highlightIdx ? secondaryColor : primaryColor
-            offCtx.fillText(c, cx, y)
-            offCtx.restore()
-          }
-          offCtx.restore()
-        }
-        const shadowOff = document.createElement('canvas')
-        shadowOff.width = off.width; shadowOff.height = off.height
-        const shCtx = shadowOff.getContext('2d')
-        shCtx.drawImage(off, 0, 0)
-        shCtx.globalCompositeOperation = 'source-in'
-        shCtx.fillStyle = '#000'
-        shCtx.fillRect(0, 0, shadowOff.width, shadowOff.height)
-        const extruded = document.createElement('canvas')
-        extruded.width = off.width; extruded.height = off.height
-        const eCtx = extruded.getContext('2d')
-        const thickness = Math.round((8 / 800) * CANVAS_H)
-        for (let i = 0; i < thickness; i++) eCtx.drawImage(shadowOff, i, i)
-        eCtx.drawImage(off, 0, 0)
-        
-        ctx.save();
-        ctx.translate(0, LOGO_OFFSET_Y);
-        // Position and scale the One Piece logo with fixed vertical offset
-        ctx.save();
-        // Dynamically scale based on letter count
-        const letterCount = txt.replace(/\s/g, '').length;
-        const s = letterCount > 6 ? ONEPIECE_SCALE_SMALL : ONEPIECE_SCALE_NORMAL;
-        const offsetX = (CANVAS_W * (1 - s)) / 2;
-        const offsetY = letterCount > 6 ? ONEPIECE_OFFSET_Y_SMALL : ONEPIECE_OFFSET_Y_NORMAL;
-        ctx.translate(offsetX, offsetY);
-        ctx.scale(s, s);
-
-        ctx.save()
-        ctx.shadowColor = 'rgba(0,0,0,0.3)'
-        ctx.shadowBlur = (15 / 800) * CANVAS_H
-        ctx.shadowOffsetX = (10 / 800) * CANVAS_W
-        ctx.shadowOffsetY = (10 / 800) * CANVAS_H
-        ctx.drawImage(extruded, 0, 0)
-        ctx.restore()
+        bg.src = CUSTOM_BG_MAIN;
+        await new Promise(r => (bg.onload = r));
+        ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.drawImage(bg, 0, 0, CANVAS_W, CANVAS_H);
         ctx.restore();
-        return
       }
 
       // Metallica
@@ -523,8 +297,7 @@ export default function App() {
     }
 
     draw()
-  }, [text, theme, specific, currentSpecific?.fontFamily, currentSpecific?.color, variant, useCustomBackground, ONEPIECE_OFFSET_Y_NORMAL, ONEPIECE_OFFSET_Y_SMALL]) // Added new offsets to dependencies
-
+  }, [text, theme, specific, currentSpecific?.fontFamily, currentSpecific?.color, variant, useCustomBackground])
   // 3D / display casing logic matching 2D
   const dispString = text.length > 1
     ? text[0].toUpperCase() + text.slice(1, -1) + text[text.length - 1].toUpperCase()
@@ -708,7 +481,7 @@ export default function App() {
                  text={dispString}
                  fontJsonUrl={fontJsonUrl}
                  useCustomBackground={useCustomBackground}
-                 customBgImgSrc={customBgImgSrc}
+                 customBgImgSrc={CUSTOM_BG_MAIN}
                />
             ) : (
               <Typography color="error">3D preview not available for this font</Typography>
