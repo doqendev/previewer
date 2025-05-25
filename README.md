@@ -10,3 +10,22 @@ Currently, two official plugins are available:
 ## Expanding the ESLint configuration
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+
+## 3D Font Generation
+
+To generate the JSON typeface files used for 3D previews, run:
+
+```powershell
+npm run convert-fonts
+```
+
+The generated `.json` files will be placed in `public/fonts/` alongside the TTF fonts.
+
+## Deployment
+
+This project publishes to GitHub Pages under the `/previewer/` path. To build and deploy:
+
+```powershell
+npm run build
+npm run deploy
+```

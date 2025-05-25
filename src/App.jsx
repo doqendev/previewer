@@ -10,8 +10,22 @@ import {
   FormControl,
   InputLabel,
   Button,
+  Switch,
+  FormControlLabel,
 } from '@mui/material'
 import dballRing from './assets/dball.png'
+import ThreeDPreview from './ThreeDPreview.jsx'
+// map internal fontFamily names to Drei Text3D JSON files
+const FONT_JSON_MAP = {
+  AnimeFont: 'AnimeFont.json',
+  ONEPIECE_IL_FINAL: 'ONEPIECE_IL_FINAL.json',
+  db: 'db.json',
+  Metallica_ILL: 'Metallica_ILL.json',
+  Metal_Lord_Neww: 'Metal_Lord_Neww.json',
+  Shredded_IL: 'Shredded_IL.json',
+  Megadeth_IL: 'Megadeth_IL2.json',
+  ShowFont: 'ShowFont.json',
+};
 
 const THEMES = [
   {
@@ -158,6 +172,7 @@ const kerningTable = {
 
 export default function App() {
   const [text, setText] = useState('preview')
+  const [use3D, setUse3D] = useState(false)
   const [theme, setTheme] = useState('anime')
   const [specific, setSpecific] = useState('naruto')
   const [variant, setVariant] = useState('')
@@ -165,6 +180,16 @@ export default function App() {
 
   const currentTheme = THEMES.find((t) => t.value === theme)
   const currentSpecific = currentTheme.options.find((o) => o.value === specific)
+  // JSON font URL for Drei Text3D
+  const jsonFile = FONT_JSON_MAP[currentSpecific.fontFamily]
+  const fontJsonUrl = jsonFile ? `${import.meta.env.BASE_URL}fonts/${jsonFile}` : undefined
+  // enable 3D preview only for Metallica logo
+  const is3DAvailable = specific === 'metallica' && Boolean(fontJsonUrl)
+
+  // reset 3D mode when switching away
+  useEffect(() => {
+    if (specific !== 'metallica' && use3D) setUse3D(false)
+  }, [specific, use3D])
 
   useEffect(() => {
     const draw = async () => {
@@ -277,9 +302,7 @@ export default function App() {
         const maxFontSize = Math.min(400, CANVAS_H * 0.5)
         const baseFontSize = txt.length > 11 ? maxFontSize * 0.7 : maxFontSize
         const fontSize = baseFontSize
-        // default letter spacing if no kerning rule
-        const defaultSpacing = (10 / 800) * CANVAS_W
-         // create offscreen canvas
+        // create offscreen canvas
         const off = document.createElement('canvas')
         off.width = CANVAS_W
         off.height = CANVAS_H
@@ -313,8 +336,6 @@ export default function App() {
         offCtx.lineJoin = 'round'
         // line width relative to font size (15 at 400px base)
         offCtx.lineWidth = (15 * fontSize) / 400
-        // kerning table mapping
-        const kerning = kerningTable;
         // measure and position
         const textPadding = -10 / 800 * CANVAS_W
         let x = imgWidth + textPadding
@@ -323,9 +344,7 @@ export default function App() {
         for (let i = 0; i < txt.length; i++) {
           charPositions.push({ c: txt[i], x, idx: i })
           const w = offCtx.measureText(txt[i]).width
-          const pair = txt[i] + (txt[i + 1] || '')
-          const adj = kerning[pair] != null ? kerning[pair] : defaultSpacing
-          x += w + adj
+          x += w - 6// no spacing between letters
         }
         // determine which letter to highlight (reuse computed highlightIdx above)
         const eIndices = charPositions.filter(p => p.c === 'E').map(p => p.idx)
@@ -353,7 +372,7 @@ export default function App() {
           offCtx.save()
           offCtx.translate(startX, 0)
           // draw border
-          offCtx.drawImage(boxImg, 0, bxY, textEnd+25, bxH)
+          offCtx.drawImage(boxImg, 0, bxY, textEnd+45, bxH)
           // draw left image
           // use per-variant width & uniform height for left image
           const imgY = (CANVAS_H - imgHeight) / 2
@@ -418,13 +437,6 @@ export default function App() {
 
       // Band: Metallica
       if (theme === 'band' && specific === 'metallica') {
-        try {
-          await document.fonts.load('bold 70px Metallica_ILL')
-        } catch (err) {
-          console.warn('Metallica font failed to load, falling back:', err)
-        }
-        // now do your ctx.font = ...
-
         ctx.save()
         ctx.font = 'bold 70px Metallica_ILL, sans-serif'
         ctx.textAlign = 'center'
@@ -514,6 +526,11 @@ export default function App() {
 
     draw()
   }, [text, theme, specific, currentSpecific.fontFamily, currentSpecific.color,variant])
+
+  // 3D / display casing logic matching 2D
+  const dispString = text.length > 1
+    ? text[0].toUpperCase() + text.slice(1, -1) + text[text.length - 1].toUpperCase()
+    : text.toUpperCase()
 
   return (
     <Container
@@ -631,6 +648,18 @@ export default function App() {
               </Select>
             </FormControl>
           )}
+          {/* 3D preview toggle only for Metallica */}
+          {is3DAvailable && (
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={use3D}
+                  onChange={() => setUse3D(prev => !prev)}
+                />
+              }
+              label="3D Preview"
+            />
+          )}
         </Box>
 
         <TextField
@@ -651,19 +680,33 @@ export default function App() {
             mt: 2,
           }}
         >
-          <canvas
-            ref={canvasRef}
-            width={CANVAS_W}
-            height={CANVAS_H}
-            style={{
-              width: '100%',
-              maxWidth: CANVAS_W,
-              height: 'auto',
-              background: '#fff',
-              borderRadius: 12,
-              boxShadow: '0 2px 12px #0001',
-            }}
-          />
+          {use3D ? (
+            // ensure fallback if not available
+            fontJsonUrl ? (
+               <ThreeDPreview
+                 text={dispString}
+                 fontJsonUrl={fontJsonUrl}
+                 fillColor={currentSpecific.color}
+                 strokeColor="#000000"
+               />
+            ) : (
+              <Typography color="error">3D preview not available for this font</Typography>
+            )
+             ) : (
+               <canvas
+                 ref={canvasRef}
+                 width={CANVAS_W}
+                 height={CANVAS_H}
+                 style={{
+                   width: '100%',
+                   maxWidth: CANVAS_W,
+                   height: 'auto',
+                   background: '#fff',
+                   borderRadius: 12,
+                   boxShadow: '0 2px 12px #0001',
+                 }}
+               />
+          )}
         </Box>
         {/* Button to navigate to product page for selected style */}
         <Box sx={{ mt: 2 }}>
