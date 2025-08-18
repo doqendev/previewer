@@ -29,6 +29,11 @@
   src: url('/fonts/Megadeth_IL2.ttf') format('truetype');
   font-display: swap;
 }
+@font-face {
+  font-family: 'PLZ';
+  src: url('/fonts/PLZ.ttf') format('truetype');
+  font-display: swap;
+}
 
 #root {
   max-width: 1280px;

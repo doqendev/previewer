@@ -21,6 +21,7 @@ import { CANVAS_W, CANVAS_H, LOGO_OFFSET_Y, CUSTOM_BG_MAIN, CUSTOM_BG_SECOND, AN
 import { drawDragonBall } from './DragonBallPreview.jsx';
 import { drawOnePiece } from './OnePiecePreview.jsx';
 import { drawBand } from './BandPreview.jsx';
+import { drawHunterXHunter } from './HunterXHunterPreview.jsx';
 
 // map internal fontFamily names to Drei Text3D JSON files
 const FONT_JSON_MAP = {
@@ -43,6 +44,7 @@ const THEMES = [
       { label: 'Naruto', value: 'naruto', fontFamily: 'AnimeFont', color: '#ff9900' },
       { label: 'One Piece', value: 'onepiece', fontFamily: 'AnimeFont', color: '#0099ff' },
       { label: 'Dragon Ball', value: 'dragonball', fontFamily: 'db', color: '#fbc2eb' },
+      { label: 'Hunter x Hunter', value: 'hxh', fontFamily: 'PLZ', color: '#c60000' },
     ],
   },  {
     label: 'Band',
@@ -117,6 +119,7 @@ const PRODUCT_PAGE_URLS = {
   naruto: 'https://example.com/naruto-logo',
   onepiece: 'https://www.weletyoucook.com/product-page/anime-custom-desksign',
   dragonball: 'https://example.com/dragon-ball-logo',
+  hxh: 'https://example.com/hunter-x-hunter-logo',
   metallica: 'https://example.com/metallica-logo',
   ironmaiden: 'https://example.com/iron-maiden-logo',
   pantera: 'https://example.com/pantera-logo',
@@ -156,11 +159,15 @@ export default function App() {
         await drawOnePiece(ctx, text, variant, useCustomBackground);
         return;
       }
+      if (theme === 'anime' && specific === 'hxh') {
+        await drawHunterXHunter(ctx, text, useCustomBackground);
+        return;
+      }
       // Band logo previews
       if (theme === 'band') {
         // pass background flag to band preview
         await drawBand(ctx, specific, text, useCustomBackground);
-        return;      }      
+        return;      }
       // Generic dual background for all remaining themes (anime naruto, show themes)
       if (useCustomBackground) {
         const letterCount = text.replace(/\s/g, '').length;
