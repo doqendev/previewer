@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logo Previewer Iframe Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .iframe-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .iframe-container h3 {
+            margin: 0;
+            padding: 15px;
+            background: #333;
+            color: white;
+            font-size: 16px;
+        }
+        
+        .iframe-container iframe {
+            border: none;
+            width: 100%;
+            display: block;
+        }
+        
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Logo Previewer - Iframe Embedding Examples</h1>
+    
+    <p>Here are different ways to embed the Logo Previewer in your website:</p>
+    
+    <!-- Standard Desktop Size -->
+    <div class="iframe-container">
+        <h3>Standard Desktop Size (800x600)</h3>
+        <iframe 
+            src="http://localhost:5173/previewer/"
+            width="800" 
+            height="600"
+            title="Logo Previewer - Desktop">
+        </iframe>
+    </div>
+    
+    <div class="code-block">
+&lt;iframe 
+    src="https://yourusername.github.io/logo-previewer/"
+    width="800" 
+    height="600"
+    frameborder="0"
+    title="Logo Previewer"&gt;
+&lt;/iframe&gt;
+    </div>
+    
+    <!-- Mobile Responsive -->
+    <div class="iframe-container">
+        <h3>Mobile/Tablet Size (400x500)</h3>
+        <iframe 
+            src="http://localhost:5173/previewer/"
+            width="400" 
+            height="500"
+            title="Logo Previewer - Mobile">
+        </iframe>
+    </div>
+    
+    <div class="code-block">
+&lt;iframe 
+    src="https://yourusername.github.io/logo-previewer/"
+    width="400" 
+    height="500"
+    frameborder="0"
+    style="max-width: 100%;"
+    title="Logo Previewer Mobile"&gt;
+&lt;/iframe&gt;
+    </div>
+    
+    <!-- Compact Size -->
+    <div class="iframe-container">
+        <h3>Compact Size (320x400)</h3>
+        <iframe 
+            src="http://localhost:5173/previewer/"
+            width="320" 
+            height="400"
+            title="Logo Previewer - Compact">
+        </iframe>
+    </div>
+    
+    <div class="code-block">
+&lt;iframe 
+    src="https://yourusername.github.io/logo-previewer/"
+    width="320" 
+    height="400"
+    frameborder="0"
+    style="max-width: 100%;"
+    title="Logo Previewer Compact"&gt;
+&lt;/iframe&gt;
+    </div>
+    
+    <!-- Full Width Responsive -->
+    <div class="iframe-container">
+        <h3>Full Width Responsive</h3>
+        <iframe 
+            src="http://localhost:5173/previewer/"
+            width="100%" 
+            height="600"
+            title="Logo Previewer - Responsive">
+        </iframe>
+    </div>
+    
+    <div class="code-block">
+&lt;div style="width: 100%; max-width: 900px;"&gt;
+    &lt;iframe 
+        src="https://yourusername.github.io/logo-previewer/"
+        width="100%" 
+        height="600"
+        frameborder="0"
+        style="border-radius: 8px;"
+        title="Logo Previewer Responsive"&gt;
+    &lt;/iframe&gt;
+&lt;/div&gt;
+    </div>
+    
+    <h2>Key Features for Iframe Embedding:</h2>
+    <ul>
+        <li>✅ <strong>No scroll bars</strong> - Content fits perfectly in iframe</li>
+        <li>✅ <strong>Responsive design</strong> - Adapts to different iframe sizes</li>
+        <li>✅ <strong>Touch-friendly</strong> - Works on mobile devices</li>
+        <li>✅ <strong>Cross-browser compatible</strong> - Works in all modern browsers</li>
+        <li>✅ <strong>Fast loading</strong> - Optimized for embedded use</li>
+    </ul>
+    
+    <h2>Deployment Instructions:</h2>
+    <ol>
+        <li>Build the project: <code>npm run build</code></li>
+        <li>Deploy to GitHub Pages or your hosting service</li>
+        <li>Use the deployed URL in your iframe src</li>
+        <li>Adjust width/height as needed for your layout</li>
+    </ol>
+</body>
+</html>

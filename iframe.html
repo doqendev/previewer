@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Logo Previewer - Iframe Version</title>
+    <style>
+      /* Remove all scroll bars and ensure proper iframe sizing */
+      html, body {
+        overflow: hidden !important;
+        height: 100% !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-sizing: border-box !important;
+      }
+      
+      #root {
+        height: 100vh !important;
+        width: 100vw !important;
+        overflow: hidden !important;
+      }
+      
+      /* Responsive canvas */
+      canvas {
+        max-width: 100% !important;
+        height: auto !important;
+        object-fit: contain !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

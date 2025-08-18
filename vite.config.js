@@ -5,4 +5,15 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   base: '/previewer/',
   plugins: [react()],
+  build: {
+    rollupOptions: {
+      input: {
+        main: 'index.html',
+        iframe: 'iframe.html'
+      }
+    }
+  },
+  server: {
+    host: true, // Allow external connections for iframe testing
+  }
 })

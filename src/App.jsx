@@ -17,7 +17,7 @@ import {
   AccordionDetails,
 } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { CANVAS_W, CANVAS_H, LOGO_OFFSET_Y, CUSTOM_BG_MAIN } from './previewConfig';
+import { CANVAS_W, CANVAS_H, LOGO_OFFSET_Y, CUSTOM_BG_MAIN, CUSTOM_BG_SECOND, ANIME_OFFSET_Y_NORMAL, ANIME_OFFSET_Y_SMALL, ANIME_SCALE_NORMAL, ANIME_SCALE_SMALL, SHOW_OFFSET_Y_NORMAL, SHOW_OFFSET_Y_SMALL, SHOW_SCALE_NORMAL, SHOW_SCALE_SMALL } from './previewConfig';
 import { drawDragonBall } from './DragonBallPreview.jsx';
 import { drawOnePiece } from './OnePiecePreview.jsx';
 import { drawBand } from './BandPreview.jsx';
@@ -32,6 +32,7 @@ const FONT_JSON_MAP = {
   Shredded_IL: 'Shredded_IL.json',
   Megadeth_IL: 'Megadeth_IL2.json',
   ShowFont: 'ShowFont.json',
+  Squealer: 'squealer.json',
 };
 
 const THEMES = [
@@ -43,8 +44,7 @@ const THEMES = [
       { label: 'One Piece', value: 'onepiece', fontFamily: 'AnimeFont', color: '#0099ff' },
       { label: 'Dragon Ball', value: 'dragonball', fontFamily: 'db', color: '#fbc2eb' },
     ],
-  },
-  {
+  },  {
     label: 'Band',
     value: 'band',
     options: [
@@ -52,6 +52,7 @@ const THEMES = [
       { label: 'Iron Maiden', value: 'ironmaiden', fontFamily: 'Metal_Lord_Neww', color: '#ffd700' },
       { label: 'Pantera', value: 'pantera', fontFamily: 'Shredded_IL', color: '#b71c1c' },
       { label: 'Megadeth', value: 'megadeth', fontFamily: 'Megadeth_IL', color: '#bfa14a' },
+      { label: 'AC/DC', value: 'acdc', fontFamily: 'Squealer', color: '#ff0000' },
     ],
   },
   {
@@ -68,24 +69,24 @@ const THEMES = [
 // Define logo variants for specific themes
 const VARIANTS = {
   onepiece: [
-    { label: 'Char1', value: 'char1' },
-    { label: 'Char2', value: 'char2' },
-    { label: 'Char3', value: 'char3' },
-    { label: 'Char4', value: 'char4' },
-    { label: 'Char5', value: 'char5' },
-    { label: 'Char6', value: 'char6' },
-    { label: 'Char7', value: 'char7' },
-    { label: 'Char8', value: 'char8' },
-    { label: 'Char9', value: 'char9' },
-    { label: 'Char10', value: 'char10' },
-    { label: 'Char11', value: 'char11' },
-    { label: 'Char12', value: 'char12' },
-    { label: 'Char13', value: 'char13' },
-    { label: 'Char14', value: 'char14' },
-    { label: 'Char15', value: 'char15' },
-    { label: 'Char16', value: 'char16' },
-    { label: 'Char17', value: 'char17' },
-    { label: 'Char18', value: 'char18' },
+    { label: 'Luffy', value: 'char1' },
+    { label: 'Zoro', value: 'char2' },
+    { label: 'Ace', value: 'char3' },
+    { label: 'Chopper', value: 'char4' },
+    { label: 'Law', value: 'char5' },
+    { label: 'Shanks', value: 'char6' },
+    { label: 'Nami', value: 'char7' },
+    { label: 'Franky', value: 'char8' },
+    { label: 'Robin', value: 'char9' },
+    { label: 'Sanji', value: 'char10' },
+    { label: 'Brook', value: 'char11' },
+    { label: 'Ussop', value: 'char12' },
+    { label: 'Boa', value: 'char13' },
+    { label: 'Jinbe', value: 'char14' },
+    { label: 'Kaido', value: 'char15' },
+    { label: 'Whitebeard', value: 'char16' },
+    { label: 'Roger', value: 'char17' },
+    { label: 'Buggy', value: 'char18' },
   ],
 }
 
@@ -120,6 +121,7 @@ const PRODUCT_PAGE_URLS = {
   ironmaiden: 'https://example.com/iron-maiden-logo',
   pantera: 'https://example.com/pantera-logo',
   megadeth: 'https://example.com/megadeth-logo',
+  acdc: 'https://example.com/acdc-logo',
   friends: 'https://example.com/friends-logo',
   breakingbad: 'https://example.com/breaking-bad-logo',
   strangerthings: 'https://example.com/stranger-things-logo',
@@ -127,28 +129,18 @@ const PRODUCT_PAGE_URLS = {
 
 export default function App() {
   const [text, setText] = useState('preview')
-  const [use3D, setUse3D] = useState(false)
   const [theme, setTheme] = useState('anime')
   const [specific, setSpecific] = useState('naruto')
   const [variant, setVariant] = useState('')
   const canvasRef = useRef(null)
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [useCustomBackground, setUseCustomBackground] = useState(false);
+  // Background image is active by default; toggle to remove it
+  const [useCustomBackground, setUseCustomBackground] = useState(true);
   // Vertical offset for all logos; adjust this value in code as needed
   const LOGO_OFFSET_Y = 0;
 
   const currentTheme = THEMES.find((t) => t.value === theme)
   const currentSpecific = currentTheme.options.find((o) => o.value === specific)
-  // JSON font URL for Drei Text3D
-  const jsonFile = FONT_JSON_MAP[currentSpecific.fontFamily]
-  const fontJsonUrl = jsonFile ? `${import.meta.env.BASE_URL}fonts/${jsonFile}` : undefined
-  // enable 3D preview only for Metallica logo
-  const is3DAvailable = specific === 'metallica' && Boolean(fontJsonUrl)
-
-  // reset 3D mode when switching away
-  useEffect(() => {
-    if (specific !== 'metallica' && use3D) setUse3D(false)
-  }, [specific, use3D])
 
   useEffect(() => {
     const draw = async () => {
@@ -166,108 +158,19 @@ export default function App() {
       }
       // Band logo previews
       if (theme === 'band') {
-        await drawBand(ctx, specific, text);
-        return;
-      }
-      // Generic custom background
+        // pass background flag to band preview
+        await drawBand(ctx, specific, text, useCustomBackground);
+        return;      }      
+      // Generic dual background for all remaining themes (anime naruto, show themes)
       if (useCustomBackground) {
+        const letterCount = text.replace(/\s/g, '').length;
         const bg = new Image();
-        bg.src = CUSTOM_BG_MAIN;
+        bg.src = letterCount > 6 ? CUSTOM_BG_SECOND : CUSTOM_BG_MAIN;
         await new Promise(r => (bg.onload = r));
-        ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.save(); 
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.drawImage(bg, 0, 0, CANVAS_W, CANVAS_H);
         ctx.restore();
-      }
-
-      // Metallica
-      if (theme === 'band' && specific === 'metallica') {
-        ctx.save();
-        ctx.translate(0, LOGO_OFFSET_Y);
-        ctx.save()
-        ctx.font = 'bold 70px Metallica_ILL, sans-serif'
-        ctx.textAlign = 'center'
-        ctx.textBaseline = 'middle'
-        ctx.lineJoin = 'round'
-        ctx.lineCap = 'round'
-        ctx.lineWidth = 10
-        ctx.strokeStyle = '#000'
-        ctx.strokeText(disp, CANVAS_W / 2, CANVAS_H / 2)
-        ctx.fillStyle = '#fff'
-        ctx.lineWidth = 4
-        ctx.strokeText(disp, CANVAS_W / 2, CANVAS_H / 2)
-        ctx.fillText(disp, CANVAS_W / 2, CANVAS_H / 2)
-        ctx.restore()
-        ctx.restore();
-        return
-      }
-
-      // Pantera
-      if (theme === 'band' && specific === 'pantera') {
-        ctx.save();
-        ctx.translate(0, LOGO_OFFSET_Y);
-        ctx.save()
-        await document.fonts.load('bold 120px Shredded_IL')
-        ctx.font = 'bold 120px Shredded_IL, sans-serif'
-        ctx.textAlign = 'center'
-        ctx.textBaseline = 'middle'
-        ctx.lineJoin = 'round'
-        ctx.lineCap = 'round'
-        ctx.lineWidth = 18
-        ctx.strokeStyle = '#000'
-        ctx.strokeText(disp, CANVAS_W / 2, CANVAS_H / 2)
-        ctx.fillStyle = '#fff'
-        ctx.lineWidth = 6
-        ctx.strokeText(disp, CANVAS_W / 2, CANVAS_H / 2)
-        ctx.fillText(disp, CANVAS_W / 2, CANVAS_H / 2)
-        ctx.restore()
-        ctx.restore();
-        return
-      }
-
-      // Iron Maiden
-      if (theme === 'band' && specific === 'ironmaiden') {
-        ctx.save();
-        ctx.translate(0, LOGO_OFFSET_Y);
-        ctx.save()
-        await document.fonts.load('bold 70px Metal_Lord_Neww')
-        ctx.font = 'bold 70px Metal_Lord_Neww, sans-serif'
-        ctx.textAlign = 'center'
-        ctx.textBaseline = 'middle'
-        ctx.lineWidth = 24
-        ctx.strokeStyle = '#000'
-        ctx.strokeText(disp, CANVAS_W / 2, CANVAS_H / 2)
-        ctx.lineWidth = 8
-        ctx.strokeStyle = '#fff'
-        ctx.strokeText(disp, CANVAS_W / 2, CANVAS_H / 2)
-        ctx.fillStyle = '#e63946'
-        ctx.fillText(disp, CANVAS_W / 2, CANVAS_H / 2)
-        ctx.restore()
-        ctx.restore();
-        return
-      }
-
-      // Megadeth
-      if (theme === 'band' && specific === 'megadeth') {
-        ctx.save();
-        ctx.translate(0, LOGO_OFFSET_Y);
-        ctx.save()
-        await document.fonts.load('bold 120px Megadeth_IL')
-        ctx.font = '120px Megadeth_IL, sans-serif'
-        ctx.textAlign = 'center'
-        ctx.textBaseline = 'middle'
-        ctx.lineJoin = 'round'
-        ctx.lineCap = 'round'
-        ctx.lineWidth = 15
-        ctx.strokeStyle = '#bfa14a'
-        ctx.strokeText(disp, CANVAS_W / 2, CANVAS_H / 2)
-        ctx.lineWidth = 5
-        ctx.strokeStyle = '#fff9d1'
-        ctx.strokeText(disp, CANVAS_W / 2, CANVAS_H / 2)
-        ctx.fillStyle = '#ffe784'
-        ctx.fillText(disp, CANVAS_W / 2, CANVAS_H / 2)
-        ctx.restore()
-        ctx.restore();
-        return
       }
 
       // Shared helper to uppercase and stylize band labels
@@ -281,68 +184,98 @@ export default function App() {
         disp = disp.toUpperCase()
       }
 
-      // Generic 2D styles
+      // Generic 2D styles with dual scaling and offsets
       ctx.save();
       ctx.translate(0, LOGO_OFFSET_Y);
-      if (!(theme === 'anime' && specific === 'onepiece')) {
-        ctx.save()
-        ctx.font = `bold 70px ${currentSpecific.fontFamily}, sans-serif`
-        ctx.textAlign = 'center'
-        ctx.textBaseline = 'middle'
-        ctx.fillStyle = currentSpecific.color
-        ctx.fillText(text, CANVAS_W / 2, CANVAS_H / 2) // Use original text for these simpler previews
-        ctx.restore()
+      
+      // Apply scaling and vertical offset based on text length and theme
+      const letterCount = text.replace(/\s/g, '').length;
+      let scale, offsetY;
+      
+      if (theme === 'anime') {
+        scale = letterCount > 6 
+          ? (ANIME_SCALE_SMALL[specific] || 0.8) 
+          : (ANIME_SCALE_NORMAL[specific] || 1.0);
+        offsetY = letterCount > 6 
+          ? (ANIME_OFFSET_Y_SMALL[specific] || LOGO_OFFSET_Y + 25)
+          : (ANIME_OFFSET_Y_NORMAL[specific] || LOGO_OFFSET_Y);
+      } else if (theme === 'show') {
+        scale = letterCount > 6 
+          ? (SHOW_SCALE_SMALL[specific] || 0.8) 
+          : (SHOW_SCALE_NORMAL[specific] || 1.0);
+        offsetY = letterCount > 6 
+          ? (SHOW_OFFSET_Y_SMALL[specific] || LOGO_OFFSET_Y + 20)
+          : (SHOW_OFFSET_Y_NORMAL[specific] || LOGO_OFFSET_Y);
+      } else {
+        // Fallback for any other themes
+        scale = letterCount > 6 ? 0.8 : 1.0;
+        offsetY = letterCount > 6 ? LOGO_OFFSET_Y + 20 : LOGO_OFFSET_Y;
       }
-      ctx.restore();
+        const offsetX = (CANVAS_W * (1 - scale)) / 2;
+      ctx.save();
+      ctx.translate(offsetX, offsetY);
+      ctx.scale(scale, scale);
+      
+      if (!(theme === 'anime' && specific === 'onepiece')) {
+        ctx.save();
+        ctx.font = `bold 70px ${currentSpecific.fontFamily}, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = currentSpecific.color;
+        ctx.fillText(text, CANVAS_W / 2, CANVAS_H / 2); // Use original text for these simpler previews
+        ctx.restore();
+      }
+      ctx.restore(); // restore scale and offset
+      ctx.restore(); // restore initial translate
     }
 
     draw()
   }, [text, theme, specific, currentSpecific?.fontFamily, currentSpecific?.color, variant, useCustomBackground])
-  // 3D / display casing logic matching 2D
-  const dispString = text.length > 1
-    ? text[0].toUpperCase() + text.slice(1, -1) + text[text.length - 1].toUpperCase()
-    : text.toUpperCase()
-
+  // Removed dispString as 3D preview is disabled
   return (
     <Container
-      maxWidth="sm"
+      maxWidth="lg"
       sx={{
-        minHeight: '100vh',
+        height: '100vh',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
         bgcolor: 'background.default',
-        py: 6,
+        py: { xs: 1, sm: 2 },
+        px: { xs: 1, sm: 2 },
+        overflow: 'hidden',
       }}
-    >
-      <Paper
+    >      <Paper
         elevation={6}
         sx={{
           width: '100%',
-          p: { xs: 2, sm: 5 },
-          borderRadius: 6,
+          maxWidth: '900px',
+          p: { xs: 1, sm: 2, md: 3 },
+          borderRadius: { xs: 2, sm: 4 },
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: 5,
+          gap: { xs: 2, sm: 3 },
           backdropFilter: 'blur(12px)',
           background: 'rgba(255,255,255,0.95)',
           boxShadow: '0 10px 30px 4px #bbb5',
+          height: 'fit-content',
+          overflow: 'hidden',
         }}
-      >
-        <Typography
+      >        <Typography
           variant="h2"
           align="center"
           fontWeight={900}
           gutterBottom
           sx={{
-            fontSize: { xs: '2.3rem', sm: '3.2rem' },
+            fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' },
             letterSpacing: '0.04em',
             background: 'linear-gradient(120deg,#ff4ecd 40%,#4361ee 70%,#fff 100%)',
             backgroundClip: 'text',
             WebkitBackgroundClip: 'text',
             color: 'transparent',
+            mb: { xs: 1, sm: 2 },
           }}
         >
           Name/Logo Previewer
@@ -417,18 +350,6 @@ export default function App() {
               </Select>
             </FormControl>
           )}
-          {/* 3D preview toggle only for Metallica */}
-          {is3DAvailable && (
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={use3D}
-                  onChange={() => setUse3D(prev => !prev)}
-                />
-              }
-              label="3D Preview"
-            />
-          )}
         </Box>
 
         <TextField
@@ -455,46 +376,43 @@ export default function App() {
               <FormControlLabel
                 control={
                   <Switch
-                    checked={useCustomBackground}
-                    onChange={(e) => setUseCustomBackground(e.target.checked)}
+                    checked={!useCustomBackground}
+                    onChange={(e) => setUseCustomBackground(!e.target.checked)}
                   />
                 }
-                label="Use Custom Background"
+                label="Remove Background"
               />
             </AccordionDetails>
           </Accordion>
-        </Box>
-
-        <Box // Box for canvas/3D preview
+        </Box>        <Box // Box for canvas/3D preview
           sx={{
             width: '100%',
             display: 'flex',
             justifyContent: 'center',
-            mt: 2,
-            border: '1px solid #ccc', // Added a subtle border to canvas/preview area
-            overflow: 'hidden', // Ensure canvas content fits
+            mt: { xs: 1, sm: 2 },
+            border: '1px solid #ccc',
+            overflow: 'hidden',
+            borderRadius: 2,
+            '& canvas': {
+              maxWidth: '100%',
+              height: 'auto',
+              display: 'block',
+            }
           }}
         >
-          {use3D ? (
-            fontJsonUrl ? (
-               <ThreeDPreview
-                 text={dispString}
-                 fontJsonUrl={fontJsonUrl}
-                 useCustomBackground={useCustomBackground}
-                 customBgImgSrc={CUSTOM_BG_MAIN}
-               />
-            ) : (
-              <Typography color="error">3D preview not available for this font</Typography>
-            )
-             ) : (
-            <canvas ref={canvasRef} width={CANVAS_W} height={CANVAS_H} />
-          )}
-        </Box>
-
-        <Button
+          {/* Always render 2D canvas; 3D preview on hold */}
+          <canvas ref={canvasRef} width={CANVAS_W} height={CANVAS_H} />
+        </Box>        <Button
           variant="contained"
           color="primary"
-          sx={{ mt: 4, py: 1.5, px: 5, fontSize: '1.1rem', borderRadius: 3, fontWeight: 'bold' }}
+          sx={{ 
+            mt: { xs: 2, sm: 3 }, 
+            py: { xs: 1, sm: 1.5 }, 
+            px: { xs: 3, sm: 5 }, 
+            fontSize: { xs: '0.9rem', sm: '1.1rem' }, 
+            borderRadius: 3, 
+            fontWeight: 'bold' 
+          }}
           onClick={() => {
             const url = PRODUCT_PAGE_URLS[specific] || 'https://example.com/default-product-page'
             window.open(url, '_blank')
@@ -502,13 +420,15 @@ export default function App() {
         >
           Buy Now
         </Button>
-      </Paper>
-
-      <Typography
+      </Paper>      <Typography
         variant="body2"
         color="text.secondary"
         align="center"
-        sx={{ mt: 4, opacity: 0.7 }}
+        sx={{ 
+          mt: { xs: 1, sm: 2 }, 
+          opacity: 0.7,
+          fontSize: { xs: '0.7rem', sm: '0.875rem' }
+        }}
       >
         &copy; {new Date().getFullYear()} Logo Previewer — UI by Material UI.
       </Typography>

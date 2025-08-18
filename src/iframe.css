@@ -1,0 +1,65 @@
+/* Iframe-specific optimizations */
+
+/* Remove all scrollbars */
+html, body {
+  overflow: hidden !important;
+  height: 100% !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Ensure root container fills viewport */
+#root {
+  height: 100vh !important;
+  width: 100vw !important;
+  overflow: hidden !important;
+}
+
+/* Canvas responsiveness for small iframe sizes */
+canvas {
+  max-width: 100% !important;
+  height: auto !important;
+  object-fit: contain !important;
+}
+
+/* Responsive breakpoints for iframe */
+@media (max-width: 600px) {
+  /* Stack form controls vertically on small screens */
+  .MuiBox-root {
+    flex-direction: column !important;
+  }
+  
+  /* Reduce padding on small screens */
+  .MuiContainer-root {
+    padding: 8px !important;
+  }
+  
+  .MuiPaper-root {
+    padding: 8px !important;
+    margin: 4px !important;
+  }
+}
+
+@media (max-width: 400px) {
+  /* Ultra compact for very small iframes */
+  .MuiTypography-h2 {
+    font-size: 1.2rem !important;
+  }
+  
+  .MuiButton-root {
+    font-size: 0.8rem !important;
+    padding: 6px 12px !important;
+  }
+}
+
+/* Hide elements that might cause overflow */
+.MuiContainer-root {
+  max-height: 100vh;
+  overflow: hidden;
+}
+
+/* Ensure accordion doesn't cause overflow */
+.MuiAccordion-root {
+  overflow: hidden;
+}

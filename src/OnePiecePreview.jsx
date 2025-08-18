@@ -63,12 +63,15 @@ export async function drawOnePiece(ctx, text, variant, useCustomBackground) {
   const HEIGHT_ADJ = { C: 0.95, S: 0.95, O: 1.05, A: 0.97, E: 0.95 };
   const eIndices = charPositions.filter(p => p.c === 'E').map(p => p.idx);
   const iIndices = charPositions.filter(p => p.c === 'I').map(p => p.idx);
-  let highlightIdx = -1;
-  if (eIndices.length === 1 && iIndices.length === 0) highlightIdx = eIndices[0];
-  else if (iIndices.length === 1 && eIndices.length === 0) highlightIdx = iIndices[0];
-  else if (iIndices.length === 1 && eIndices.length === 1) highlightIdx = iIndices[0];
-  else if (eIndices.length > 1 || iIndices.length > 1) highlightIdx = Math.max(eIndices[eIndices.length-1]||-1, iIndices[iIndices.length-1]||-1);
-  if (highlightIdx === -1) highlightIdx = txt.length > 1 ? txt.length - 2 : 0;
+  // Highlight logic: prefer rightmost I if any, else rightmost E, else second-to-last char
+  let highlightIdx;
+  if (iIndices.length > 0) {
+    highlightIdx = iIndices[iIndices.length - 1];
+  } else if (eIndices.length > 0) {
+    highlightIdx = eIndices[eIndices.length - 1];
+  } else {
+    highlightIdx = txt.length > 1 ? txt.length - 2 : 0;
+  }
 
   if (charPositions.length > 0) {
     const lastChar = charPositions[charPositions.length - 1];
