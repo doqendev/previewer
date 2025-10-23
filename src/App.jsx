@@ -89,6 +89,8 @@ const VARIANTS = {
     { label: 'Whitebeard', value: 'char16' },
     { label: 'Roger', value: 'char17' },
     { label: 'Buggy', value: 'char18' },
+    { label: 'Blackbeard', value: 'char19' },
+    { label: 'Eustass Kid', value: 'char20' },
   ],
 }
 
@@ -112,6 +114,8 @@ const ONEPIECE_STYLE_CONFIGS = {
   char16: { boxFilename: 'box_purple.png', defaultStyleImage: 'style_16.png', defaultPrimaryColor: '#ffffff', defaultSecondaryColor: '#6803ff', styleScale: 1.1  },
   char17: { boxFilename: 'box_barbagrande.png', defaultStyleImage: 'style_17.png', defaultPrimaryColor: '#ffffff', defaultSecondaryColor: '#850101', styleScale: 1.2 , styleWidthScale: 1.5 },
   char18: { boxFilename: 'box_red.png', defaultStyleImage: 'style_18.png', defaultPrimaryColor: '#ffffff', defaultSecondaryColor: '#ff0000', styleScale: 1.1  },
+  char19: { boxFilename: 'box_red.png', defaultStyleImage: 'style_19.png', defaultPrimaryColor: '#ffffff', defaultSecondaryColor: '#ff0000', styleScale: 0.95, keepAspectRatio: true },
+  char20: { boxFilename: 'box_red.png', defaultStyleImage: 'style_20.png', defaultPrimaryColor: '#ffff00', defaultSecondaryColor: '#ff0000', styleScale: 0.9, keepAspectRatio: true },
 }
 
 // Mapping of themespecific styles to product page URLs

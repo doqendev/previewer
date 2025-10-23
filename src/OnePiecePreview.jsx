@@ -39,11 +39,19 @@ export async function drawOnePiece(ctx, text, variant, useCustomBackground) {
   const bxY = CANVAS_H - bxH - (160 / 800) * CANVAS_H;
   const mainH = CANVAS_H * 0.5;
   const styleScale = cfg.styleScale ?? 1;
-  const widthScale = cfg.styleWidthScale ?? styleScale;
-  const imgWidth = mainH * widthScale;
-  const imgHeight = mainH * styleScale;
+  let imgHeight = mainH * styleScale;
+  let imgWidth;
   const styleImg = new Image(); styleImg.src = new URL(`./assets/${cfg.defaultStyleImage}`, import.meta.url).href;
   await new Promise(r => (styleImg.onload = r));
+  if (cfg.keepAspectRatio) {
+    const naturalWidth = styleImg.naturalWidth || styleImg.width || 1;
+    const naturalHeight = styleImg.naturalHeight || styleImg.height || 1;
+    const aspectRatio = naturalHeight > 0 ? naturalWidth / naturalHeight : 1;
+    imgWidth = imgHeight * aspectRatio;
+  } else {
+    const widthScale = cfg.styleWidthScale ?? styleScale;
+    imgWidth = mainH * widthScale;
+  }
 
   offCtx.font = `${fontSize}px ONEPIECE_IL_FINAL`;
   offCtx.textBaseline = 'middle';

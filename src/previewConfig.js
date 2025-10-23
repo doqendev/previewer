@@ -42,6 +42,8 @@ export const ONEPIECE_STYLE_CONFIGS = {
   char16: { boxFilename: 'box_purple.png', defaultStyleImage: 'style_16.png', defaultPrimaryColor: '#ffffff', defaultSecondaryColor: '#6803ff', styleScale: 1.1 },
   char17: { boxFilename: 'box_barbagrande.png', defaultStyleImage: 'style_17.png', defaultPrimaryColor: '#ffffff', defaultSecondaryColor: '#850101', styleScale: 1.2, styleWidthScale: 1.5 },
   char18: { boxFilename: 'box_red.png', defaultStyleImage: 'style_18.png', defaultPrimaryColor: '#ffffff', defaultSecondaryColor: '#ff0000', styleScale: 1.1 },
+  char19: { boxFilename: 'box_red.png', defaultStyleImage: 'style_19.png', defaultPrimaryColor: '#ffffff', defaultSecondaryColor: '#ff0000', styleScale: 0.95, keepAspectRatio: true },
+  char20: { boxFilename: 'box_red.png', defaultStyleImage: 'style_20.png', defaultPrimaryColor: '#ffff00', defaultSecondaryColor: '#ff0000', styleScale: 0.9, keepAspectRatio: true },
 }
 // Added Dragon Ball scaling and vertical offsets for multiple backgrounds
 export const DRAGONBALL_SCALE_NORMAL = 1.2
