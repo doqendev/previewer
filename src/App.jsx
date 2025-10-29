@@ -6,6 +6,8 @@ import {
   TextField,
   Select,
   MenuItem,
+  Grid,
+  Stack,
   Paper,
   FormControl,
   InputLabel,
@@ -153,7 +155,7 @@ export default function App() {
   // Vertical offset for all logos; adjust this value in code as needed
   const LOGO_OFFSET_Y = 0;
   // Allow users to enlarge the preview canvas for better visibility
-  const [previewScale, setPreviewScale] = useState(1.4);
+  const [previewScale, setPreviewScale] = useState(1.8);
   const scaledCanvasWidth = Math.round(CANVAS_W * previewScale);
   const scaledCanvasHeight = Math.round(CANVAS_H * previewScale);
 
@@ -161,6 +163,7 @@ export default function App() {
   const currentSpecific = currentTheme.options.find((o) => o.value === specific)
   const displayFontFamily = currentSpecific?.fontFamily || 'AnimeFont'
   const displayColor = currentSpecific?.color || '#ffffff'
+  const hasVariant = Boolean(VARIANTS[specific])
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -351,125 +354,140 @@ export default function App() {
         elevation={0}
         sx={{
           width: '100%',
-          maxWidth: '100%',
           minHeight: '100vh',
-          p: { xs: 2, sm: 3, md: 5 },
+          px: { xs: 2, sm: 3, md: 6 },
+          py: { xs: 3, md: 5 },
           borderRadius: 0,
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'stretch',
-          gap: { xs: 2, sm: 3 },
-          backdropFilter: 'none',
+          alignItems: 'center',
+          gap: { xs: 3, md: 4 },
           background: 'transparent',
           boxShadow: 'none',
         }}
+      >
+        <Box
+          sx={{
+            width: '100%',
+            maxWidth: 1320,
+            mx: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: { xs: 3, md: 4 },
+          }}
         >
           <Typography
             variant="h2"
             fontWeight={900}
             gutterBottom
             sx={{
-              fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.75rem' },
+              fontSize: { xs: '1.75rem', sm: '2.1rem', md: '2.5rem' },
               letterSpacing: '0.04em',
               background: 'linear-gradient(120deg,#ff4ecd 40%,#4361ee 70%,#fff 100%)',
               backgroundClip: 'text',
               WebkitBackgroundClip: 'text',
               color: 'transparent',
-              mb: { xs: 1, sm: 2 },
+              textAlign: 'center',
             }}
           >
             Name/Logo Previewer
-        </Typography>
+          </Typography>
 
-        <Box
-          sx={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            flexDirection: { xs: 'column', sm: 'row' },
-            gap: 2,
-            width: '100%',
-          }}
-        >
-          <FormControl fullWidth variant="outlined">
-            <InputLabel id="theme-label">Theme</InputLabel>
-            <Select
-              labelId="theme-label"
-              id="theme-select"
-              value={theme}
-              label="Theme"
-              onChange={(e) => {
-                const newTheme = e.target.value
-                setTheme(newTheme)
-                const themeEntry = THEMES.find((t) => t.value === newTheme)
-                const firstSpecific = themeEntry?.options?.[0]?.value || ''
-                setSpecific(firstSpecific)
-                const defaultVariant = VARIANTS[firstSpecific]?.[0]?.value || ''
-                setVariant(defaultVariant)
-              }}
-            >
-              {THEMES.map((t) => (
-                <MenuItem key={t.value} value={t.value}>
-                  {t.label}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <Grid container spacing={2} alignItems="flex-end">
+            <Grid item xs={12} md={hasVariant ? 4 : 6}>
+              <FormControl fullWidth variant="outlined">
+                <InputLabel id="theme-label">Theme</InputLabel>
+                <Select
+                  labelId="theme-label"
+                  id="theme-select"
+                  value={theme}
+                  label="Theme"
+                  onChange={(e) => {
+                    const newTheme = e.target.value
+                    setTheme(newTheme)
+                    const themeEntry = THEMES.find((t) => t.value === newTheme)
+                    const firstSpecific = themeEntry?.options?.[0]?.value || ''
+                    setSpecific(firstSpecific)
+                    const defaultVariant = VARIANTS[firstSpecific]?.[0]?.value || ''
+                    setVariant(defaultVariant)
+                  }}
+                >
+                  {THEMES.map((t) => (
+                    <MenuItem key={t.value} value={t.value}>
+                      {t.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
 
-          <FormControl fullWidth variant="outlined">
-            <InputLabel id="specific-label">{currentTheme?.label}</InputLabel> 
-            <Select
-              labelId="specific-label"
-              id="specific-select"
-              value={specific}
-              label={currentTheme?.label} // Optional chaining
-              onChange={(e) => {
-                const spec = e.target.value
-                setSpecific(spec)
-                const defaultVariant = VARIANTS[spec]?.[0]?.value || ''
-                setVariant(defaultVariant)
-              }}
-            >
-              {currentTheme?.options.map((opt) => ( // Optional chaining
-                <MenuItem key={opt.value} value={opt.value}>
-                  {opt.label}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          {/* Variant selector for logos with multiple variants */}
-          {VARIANTS[specific] && (
-            <FormControl fullWidth variant="outlined">
-              <InputLabel id="variant-label">Variant</InputLabel>
-              <Select
-                labelId="variant-label"
-                id="variant-select"
-                value={variant}
-                label="Variant"
-                onChange={(e) => setVariant(e.target.value)}
-              >
-                {VARIANTS[specific].map((opt) => (
-                  <MenuItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          )}
-        </Box>
+            <Grid item xs={12} md={hasVariant ? 4 : 6}>
+              <FormControl fullWidth variant="outlined">
+                <InputLabel id="specific-label">{currentTheme?.label}</InputLabel>
+                <Select
+                  labelId="specific-label"
+                  id="specific-select"
+                  value={specific}
+                  label={currentTheme?.label}
+                  onChange={(e) => {
+                    const spec = e.target.value
+                    setSpecific(spec)
+                    const defaultVariant = VARIANTS[spec]?.[0]?.value || ''
+                    setVariant(defaultVariant)
+                  }}
+                >
+                  {currentTheme?.options.map((opt) => (
+                    <MenuItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
 
-        <TextField
-          fullWidth
-          variant="outlined"
-          label="Your Text"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onFocus={() => { if (text === 'preview') setText('') }}
-          inputProps={{ maxLength: 32 }}
-        />
+            {hasVariant && (
+              <Grid item xs={12} md={4}>
+                <FormControl fullWidth variant="outlined">
+                  <InputLabel id="variant-label">Variant</InputLabel>
+                  <Select
+                    labelId="variant-label"
+                    id="variant-select"
+                    value={variant}
+                    label="Variant"
+                    onChange={(e) => setVariant(e.target.value)}
+                  >
+                    {VARIANTS[specific].map((opt) => (
+                      <MenuItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+            )}
 
-        {/* Advanced Options Accordion */}
-        <Box sx={{ width: '100%' }}>
-          <Accordion expanded={showAdvanced} onChange={() => setShowAdvanced(!showAdvanced)} sx={{ background: 'rgba(255,255,255,0.85)', boxShadow: 'none', border: '1px solid rgba(0,0,0,0.12)' }}>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                label="Your Text"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                onFocus={() => { if (text === 'preview') setText('') }}
+                inputProps={{ maxLength: 32 }}
+              />
+            </Grid>
+          </Grid>
+
+          <Accordion
+            expanded={showAdvanced}
+            onChange={() => setShowAdvanced(!showAdvanced)}
+            sx={{
+              background: 'rgba(255,255,255,0.85)',
+              boxShadow: 'none',
+              border: '1px solid rgba(0,0,0,0.12)',
+            }}
+          >
             <AccordionSummary
               expandIcon={<ExpandMoreIcon />}
               aria-controls="advanced-options-content"
@@ -478,92 +496,98 @@ export default function App() {
               <Typography>Advanced Options</Typography>
             </AccordionSummary>
             <AccordionDetails>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={!useCustomBackground}
-                    onChange={(e) => setUseCustomBackground(!e.target.checked)}
-                  />
-                }
-                label="Remove Background"
-              />
-              <Box sx={{ mt: 3 }}>
-                <Typography variant="subtitle2" gutterBottom>
-                  Preview Size
-                </Typography>
-                <Slider
-                  value={previewScale}
-                  onChange={(_, value) => {
-                    if (Array.isArray(value)) return
-                    setPreviewScale(Number(value.toFixed(2)))
-                  }}
-                  min={1}
-                  max={2.5}
-                  step={0.05}
-                  valueLabelDisplay="auto"
-                  valueLabelFormat={(value) => `${Math.round(value * 100)}%`}
+              <Stack
+                direction={{ xs: 'column', md: 'row' }}
+                spacing={{ xs: 2, md: 3 }}
+                alignItems={{ xs: 'flex-start', md: 'center' }}
+                justifyContent="space-between"
+              >
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={!useCustomBackground}
+                      onChange={(e) => setUseCustomBackground(!e.target.checked)}
+                    />
+                  }
+                  label="Remove Background"
                 />
-                <Typography variant="caption" color="text.secondary">
-                  Canvas renders at {scaledCanvasWidth}px × {scaledCanvasHeight}px
-                </Typography>
-              </Box>
+                <Box sx={{ flex: 1, minWidth: { xs: '100%', md: 280 } }}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Preview Size
+                  </Typography>
+                  <Slider
+                    value={previewScale}
+                    onChange={(_, value) => {
+                      if (Array.isArray(value)) return
+                      setPreviewScale(Number(value.toFixed(2)))
+                    }}
+                    min={1}
+                    max={3}
+                    step={0.1}
+                    valueLabelDisplay="auto"
+                    valueLabelFormat={(value) => `${Math.round(value * 100)}%`}
+                  />
+                  <Typography variant="caption" color="text.secondary">
+                    Canvas renders at {scaledCanvasWidth}px x {scaledCanvasHeight}px
+                  </Typography>
+                </Box>
+              </Stack>
             </AccordionDetails>
           </Accordion>
+
+          <Box
+            sx={{
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              border: '1px solid rgba(0,0,0,0.15)',
+              borderRadius: 3,
+              backgroundColor: '#0d0d0d',
+              p: { xs: 2, md: 3 },
+              '& canvas': {
+                width: `${scaledCanvasWidth}px`,
+                maxWidth: '95vw',
+                height: 'auto',
+                display: 'block',
+                margin: '0 auto',
+              },
+            }}
+          >
+            <canvas ref={canvasRef} width={CANVAS_W} height={CANVAS_H} />
+          </Box>
+
+          <Button
+            variant="contained"
+            color="primary"
+            sx={{
+              alignSelf: { xs: 'stretch', sm: 'flex-start' },
+              py: { xs: 1, sm: 1.3 },
+              px: { xs: 3, sm: 4 },
+              fontSize: { xs: '0.95rem', sm: '1.05rem' },
+              borderRadius: 3,
+              fontWeight: 'bold',
+            }}
+            onClick={() => {
+              const url = PRODUCT_PAGE_URLS[specific] || 'https://example.com/default-product-page'
+              window.open(url, '_blank')
+            }}
+          >
+            Buy Now
+          </Button>
         </Box>
 
-        <Box
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          align="center"
           sx={{
-            width: '100%',
-            display: 'flex',
-            justifyContent: 'center',
-            border: '1px solid rgba(0,0,0,0.15)',
-            borderRadius: 3,
-            overflow: 'auto',
-            backgroundColor: '#0d0d0d',
-            '& canvas': {
-              width: `${scaledCanvasWidth}px`,
-              height: `${scaledCanvasHeight}px`,
-              display: 'block',
-              flex: '0 0 auto',
-            }
+            opacity: 0.7,
+            fontSize: { xs: '0.7rem', sm: '0.875rem' },
           }}
         >
-          {/* Always render 2D canvas; 3D preview on hold */}
-          <canvas ref={canvasRef} width={CANVAS_W} height={CANVAS_H} />
-        </Box>
-
-        <Button
-          variant="contained"
-          color="primary"
-          sx={{
-            alignSelf: { xs: 'stretch', sm: 'flex-start' },
-            py: { xs: 1, sm: 1.5 },
-            px: { xs: 3, sm: 5 },
-            fontSize: { xs: '0.9rem', sm: '1.1rem' },
-            borderRadius: 3,
-            fontWeight: 'bold'
-          }}
-          onClick={() => {
-            const url = PRODUCT_PAGE_URLS[specific] || 'https://example.com/default-product-page'
-            window.open(url, '_blank')
-          }}
-        >
-          Buy Now
-        </Button>
+          &copy; {new Date().getFullYear()} Logo Previewer - UI by Material UI.
+        </Typography>
       </Paper>
-
-      <Typography
-        variant="body2"
-        color="text.secondary"
-        align="center"
-        sx={{
-          pt: { xs: 1, sm: 2 },
-          opacity: 0.7,
-          fontSize: { xs: '0.7rem', sm: '0.875rem' }
-        }}
-      >
-        &copy; {new Date().getFullYear()} Logo Previewer - UI by Material UI.
-      </Typography>
     </Container>
   )
 }
