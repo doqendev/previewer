@@ -154,104 +154,180 @@ export default function App() {
 
   const currentTheme = THEMES.find((t) => t.value === theme)
   const currentSpecific = currentTheme.options.find((o) => o.value === specific)
+  const displayFontFamily = currentSpecific?.fontFamily || 'AnimeFont'
+  const displayColor = currentSpecific?.color || '#ffffff'
 
   useEffect(() => {
-    const draw = async () => {
-      const canvas = canvasRef.current; if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
-      // Delegate to specialized previews
-      if (theme === 'anime' && specific === 'dragonball') {
-        await drawDragonBall(ctx, text, useCustomBackground);
-        return;
-      }
-      if (theme === 'anime' && specific === 'onepiece') {
-        await drawOnePiece(ctx, text, variant, useCustomBackground);
-        return;
-      }
-      if (theme === 'anime' && specific === 'onepiece-new') {
-        await drawOnePieceNew(ctx, text, variant, useCustomBackground);
-        return;
-      }
-      if (theme === 'anime' && specific === 'hxh') {
-        await drawHunterXHunter(ctx, text, useCustomBackground);
-        return;
-      }
-      // Band logo previews
-      if (theme === 'band') {
-        // pass background flag to band preview
-        await drawBand(ctx, specific, text, useCustomBackground);
-        return;      }
-      // Generic dual background for all remaining themes (anime naruto, show themes)
-      if (useCustomBackground) {
-        const letterCount = text.replace(/\s/g, '').length;
-        const bg = new Image();
-        bg.src = letterCount > 6 ? CUSTOM_BG_SECOND : CUSTOM_BG_MAIN;
-        await new Promise(r => (bg.onload = r));
-        ctx.save(); 
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.drawImage(bg, 0, 0, CANVAS_W, CANVAS_H);
-        ctx.restore();
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const defaultSetTransform = ctx.setTransform.bind(ctx);
+
+    let cancelled = false;
+    let drawing = false;
+    let needsRerender = false;
+
+    const performDraw = async () => {
+      const originalSetTransform = defaultSetTransform;
+      const rect = canvas.getBoundingClientRect();
+      const ratio = window.devicePixelRatio || 1;
+      const cssWidth = rect.width || CANVAS_W;
+      const cssHeight = rect.height || CANVAS_H;
+      const displayWidth = Math.max(Math.round(cssWidth * ratio), 1);
+      const displayHeight = Math.max(Math.round(cssHeight * ratio), 1);
+
+      if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
+        canvas.width = displayWidth;
+        canvas.height = displayHeight;
       }
 
-      // Shared helper to uppercase and stylize band labels
-      let disp = text
-      if (disp.length > 1) {
-        disp =
-          disp[0].toUpperCase() +
-          disp.slice(1, -1) +
-          disp[disp.length - 1].toUpperCase()
-      } else {
-        disp = disp.toUpperCase()
-      }
+      const scaleX = canvas.width / CANVAS_W;
+      const scaleY = canvas.height / CANVAS_H;
+      const applyDefaultTransform = () => originalSetTransform(scaleX, 0, 0, scaleY, 0, 0);
+      applyDefaultTransform();
 
-      // Generic 2D styles with dual scaling and offsets
-      ctx.save();
-      ctx.translate(0, LOGO_OFFSET_Y);
-      
-      // Apply scaling and vertical offset based on text length and theme
-      const letterCount = text.replace(/\s/g, '').length;
-      let scale, offsetY;
-      
-      if (theme === 'anime') {
-        scale = letterCount > 6 
-          ? (ANIME_SCALE_SMALL[specific] || 0.8) 
-          : (ANIME_SCALE_NORMAL[specific] || 1.0);
-        offsetY = letterCount > 6 
-          ? (ANIME_OFFSET_Y_SMALL[specific] || LOGO_OFFSET_Y + 25)
-          : (ANIME_OFFSET_Y_NORMAL[specific] || LOGO_OFFSET_Y);
-      } else if (theme === 'show') {
-        scale = letterCount > 6 
-          ? (SHOW_SCALE_SMALL[specific] || 0.8) 
-          : (SHOW_SCALE_NORMAL[specific] || 1.0);
-        offsetY = letterCount > 6 
-          ? (SHOW_OFFSET_Y_SMALL[specific] || LOGO_OFFSET_Y + 20)
-          : (SHOW_OFFSET_Y_NORMAL[specific] || LOGO_OFFSET_Y);
-      } else {
-        // Fallback for any other themes
-        scale = letterCount > 6 ? 0.8 : 1.0;
-        offsetY = letterCount > 6 ? LOGO_OFFSET_Y + 20 : LOGO_OFFSET_Y;
-      }
-        const offsetX = (CANVAS_W * (1 - scale)) / 2;
-      ctx.save();
-      ctx.translate(offsetX, offsetY);
-      ctx.scale(scale, scale);
-      
-      if (!(theme === 'anime' && (specific === 'onepiece' || specific === 'onepiece-new'))) {
+      const patchedSetTransform = (...args) => {
+        if (
+          args.length === 6 &&
+          args[0] === 1 && args[1] === 0 &&
+          args[2] === 0 && args[3] === 1 &&
+          args[4] === 0 && args[5] === 0
+        ) {
+          applyDefaultTransform();
+        } else {
+          originalSetTransform(...args);
+        }
+      };
+
+      ctx.setTransform = patchedSetTransform;
+
+      try {
+        ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+
+        if (cancelled) return;
+
+        if (theme === 'anime' && specific === 'dragonball') {
+          await drawDragonBall(ctx, text, useCustomBackground);
+          return;
+        }
+        if (theme === 'anime' && specific === 'onepiece') {
+          await drawOnePiece(ctx, text, variant, useCustomBackground);
+          return;
+        }
+        if (theme === 'anime' && specific === 'onepiece-new') {
+          await drawOnePieceNew(ctx, text, variant, useCustomBackground);
+          return;
+        }
+        if (theme === 'anime' && specific === 'hxh') {
+          await drawHunterXHunter(ctx, text, useCustomBackground);
+          return;
+        }
+        if (theme === 'band') {
+          await drawBand(ctx, specific, text, useCustomBackground);
+          return;
+        }
+
+        if (useCustomBackground) {
+          const letterCount = text.replace(/\s/g, '').length;
+          const bg = new Image();
+          bg.src = letterCount > 6 ? CUSTOM_BG_SECOND : CUSTOM_BG_MAIN;
+          await new Promise(r => (bg.onload = r));
+          ctx.save();
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.drawImage(bg, 0, 0, CANVAS_W, CANVAS_H);
+          ctx.restore();
+        }
+
+        let disp = text;
+        if (disp.length > 1) {
+          disp =
+            disp[0].toUpperCase() +
+            disp.slice(1, -1) +
+            disp[disp.length - 1].toUpperCase();
+        } else {
+          disp = disp.toUpperCase();
+        }
+
         ctx.save();
-        ctx.font = `bold 70px ${currentSpecific.fontFamily}, sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = currentSpecific.color;
-        ctx.fillText(text, CANVAS_W / 2, CANVAS_H / 2); // Use original text for these simpler previews
-        ctx.restore();
-      }
-      ctx.restore(); // restore scale and offset
-      ctx.restore(); // restore initial translate
-    }
+        ctx.translate(0, LOGO_OFFSET_Y);
 
-    draw()
-  }, [text, theme, specific, currentSpecific?.fontFamily, currentSpecific?.color, variant, useCustomBackground])
+        const letterCount = text.replace(/\s/g, '').length;
+        let scale, offsetY;
+
+        if (theme === 'anime') {
+          scale = letterCount > 6
+            ? (ANIME_SCALE_SMALL[specific] || 0.8)
+            : (ANIME_SCALE_NORMAL[specific] || 1.0);
+          offsetY = letterCount > 6
+            ? (ANIME_OFFSET_Y_SMALL[specific] || LOGO_OFFSET_Y + 25)
+            : (ANIME_OFFSET_Y_NORMAL[specific] || LOGO_OFFSET_Y);
+        } else if (theme === 'show') {
+          scale = letterCount > 6
+            ? (SHOW_SCALE_SMALL[specific] || 0.8)
+            : (SHOW_SCALE_NORMAL[specific] || 1.0);
+          offsetY = letterCount > 6
+            ? (SHOW_OFFSET_Y_SMALL[specific] || LOGO_OFFSET_Y + 20)
+            : (SHOW_OFFSET_Y_NORMAL[specific] || LOGO_OFFSET_Y);
+        } else {
+          scale = letterCount > 6 ? 0.8 : 1.0;
+          offsetY = letterCount > 6 ? LOGO_OFFSET_Y + 20 : LOGO_OFFSET_Y;
+        }
+
+        const offsetX = (CANVAS_W * (1 - scale)) / 2;
+        ctx.save();
+        ctx.translate(offsetX, offsetY);
+        ctx.scale(scale, scale);
+
+        if (!(theme === 'anime' && (specific === 'onepiece' || specific === 'onepiece-new'))) {
+          ctx.save();
+          ctx.font = `bold 70px ${displayFontFamily}, sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillStyle = displayColor;
+          ctx.fillText(text, CANVAS_W / 2, CANVAS_H / 2);
+          ctx.restore();
+        }
+        ctx.restore();
+        ctx.restore();
+      } finally {
+        ctx.setTransform = originalSetTransform;
+        applyDefaultTransform();
+      }
+    };
+
+    const scheduleDraw = () => {
+      if (cancelled) return;
+      if (drawing) {
+        needsRerender = true;
+        return;
+      }
+
+      drawing = true;
+      performDraw()
+        .catch((err) => {
+          console.error('Failed to render preview', err);
+        })
+        .finally(() => {
+          drawing = false;
+          if (needsRerender && !cancelled) {
+            needsRerender = false;
+            scheduleDraw();
+          }
+        });
+    };
+
+    scheduleDraw();
+
+    const handleResize = () => scheduleDraw();
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener('resize', handleResize);
+      ctx.setTransform = defaultSetTransform;
+    };
+  }, [text, theme, specific, displayFontFamily, displayColor, variant, useCustomBackground]);
   // Removed dispString as 3D preview is disabled
   return (
     <Container
