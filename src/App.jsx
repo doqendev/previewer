@@ -20,6 +20,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { CANVAS_W, CANVAS_H, LOGO_OFFSET_Y, CUSTOM_BG_MAIN, CUSTOM_BG_SECOND, ANIME_OFFSET_Y_NORMAL, ANIME_OFFSET_Y_SMALL, ANIME_SCALE_NORMAL, ANIME_SCALE_SMALL, SHOW_OFFSET_Y_NORMAL, SHOW_OFFSET_Y_SMALL, SHOW_SCALE_NORMAL, SHOW_SCALE_SMALL } from './previewConfig';
 import { drawDragonBall } from './DragonBallPreview.jsx';
 import { drawOnePiece } from './OnePiecePreview.jsx';
+import { drawOnePieceNew } from './OnePiecePreviewNew.jsx';
 import { drawBand } from './BandPreview.jsx';
 import { drawHunterXHunter } from './HunterXHunterPreview.jsx';
 
@@ -43,6 +44,7 @@ const THEMES = [
     options: [
       { label: 'Naruto', value: 'naruto', fontFamily: 'AnimeFont', color: '#ff9900' },
       { label: 'One Piece', value: 'onepiece', fontFamily: 'AnimeFont', color: '#0099ff' },
+      { label: 'One Piece (New)', value: 'onepiece-new', fontFamily: 'AnimeFont', color: '#0099ff' },
       { label: 'Dragon Ball', value: 'dragonball', fontFamily: 'db', color: '#fbc2eb' },
       { label: 'Hunter x Hunter', value: 'hxh', fontFamily: 'PLZ', color: '#c60000' },
     ],
@@ -69,29 +71,32 @@ const THEMES = [
 ]
 
 // Define logo variants for specific themes
+const ONEPIECE_VARIANTS = [
+  { label: 'Luffy', value: 'char1' },
+  { label: 'Zoro', value: 'char2' },
+  { label: 'Ace', value: 'char3' },
+  { label: 'Chopper', value: 'char4' },
+  { label: 'Law', value: 'char5' },
+  { label: 'Shanks', value: 'char6' },
+  { label: 'Nami', value: 'char7' },
+  { label: 'Franky', value: 'char8' },
+  { label: 'Robin', value: 'char9' },
+  { label: 'Sanji', value: 'char10' },
+  { label: 'Brook', value: 'char11' },
+  { label: 'Ussop', value: 'char12' },
+  { label: 'Boa', value: 'char13' },
+  { label: 'Jinbe', value: 'char14' },
+  { label: 'Kaido', value: 'char15' },
+  { label: 'Whitebeard', value: 'char16' },
+  { label: 'Roger', value: 'char17' },
+  { label: 'Buggy', value: 'char18' },
+  { label: 'Blackbeard', value: 'char19' },
+  { label: 'Eustass Kid', value: 'char20' },
+]
+
 const VARIANTS = {
-  onepiece: [
-    { label: 'Luffy', value: 'char1' },
-    { label: 'Zoro', value: 'char2' },
-    { label: 'Ace', value: 'char3' },
-    { label: 'Chopper', value: 'char4' },
-    { label: 'Law', value: 'char5' },
-    { label: 'Shanks', value: 'char6' },
-    { label: 'Nami', value: 'char7' },
-    { label: 'Franky', value: 'char8' },
-    { label: 'Robin', value: 'char9' },
-    { label: 'Sanji', value: 'char10' },
-    { label: 'Brook', value: 'char11' },
-    { label: 'Ussop', value: 'char12' },
-    { label: 'Boa', value: 'char13' },
-    { label: 'Jinbe', value: 'char14' },
-    { label: 'Kaido', value: 'char15' },
-    { label: 'Whitebeard', value: 'char16' },
-    { label: 'Roger', value: 'char17' },
-    { label: 'Buggy', value: 'char18' },
-    { label: 'Blackbeard', value: 'char19' },
-    { label: 'Eustass Kid', value: 'char20' },
-  ],
+  onepiece: ONEPIECE_VARIANTS,
+  'onepiece-new': ONEPIECE_VARIANTS,
 }
 
 // Style configuration for One Piece character variants
@@ -122,6 +127,7 @@ const ONEPIECE_STYLE_CONFIGS = {
 const PRODUCT_PAGE_URLS = {
   naruto: 'https://example.com/naruto-logo',
   onepiece: 'https://www.weletyoucook.com/product-page/anime-custom-desksign',
+  'onepiece-new': 'https://www.weletyoucook.com/product-page/anime-custom-desksign',
   dragonball: 'https://example.com/dragon-ball-logo',
   hxh: 'https://example.com/hunter-x-hunter-logo',
   metallica: 'https://example.com/metallica-logo',
@@ -161,6 +167,10 @@ export default function App() {
       }
       if (theme === 'anime' && specific === 'onepiece') {
         await drawOnePiece(ctx, text, variant, useCustomBackground);
+        return;
+      }
+      if (theme === 'anime' && specific === 'onepiece-new') {
+        await drawOnePieceNew(ctx, text, variant, useCustomBackground);
         return;
       }
       if (theme === 'anime' && specific === 'hxh') {
@@ -227,7 +237,7 @@ export default function App() {
       ctx.translate(offsetX, offsetY);
       ctx.scale(scale, scale);
       
-      if (!(theme === 'anime' && specific === 'onepiece')) {
+      if (!(theme === 'anime' && (specific === 'onepiece' || specific === 'onepiece-new'))) {
         ctx.save();
         ctx.font = `bold 70px ${currentSpecific.fontFamily}, sans-serif`;
         ctx.textAlign = 'center';
@@ -245,56 +255,51 @@ export default function App() {
   // Removed dispString as 3D preview is disabled
   return (
     <Container
-      maxWidth="lg"
+      maxWidth={false}
+      disableGutters
       sx={{
-        height: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
+        minHeight: '100vh',
         bgcolor: 'background.default',
-        py: { xs: 1, sm: 2 },
-        px: { xs: 1, sm: 2 },
-        overflow: 'hidden',
       }}
-    >      <Paper
-        elevation={6}
+    >
+      <Paper
+        elevation={0}
         sx={{
           width: '100%',
-          maxWidth: '900px',
-          p: { xs: 1, sm: 2, md: 3 },
-          borderRadius: { xs: 2, sm: 4 },
+          maxWidth: '100%',
+          minHeight: '100vh',
+          p: { xs: 2, sm: 3, md: 5 },
+          borderRadius: 0,
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
+          alignItems: 'stretch',
           gap: { xs: 2, sm: 3 },
-          backdropFilter: 'blur(12px)',
-          background: 'rgba(255,255,255,0.95)',
-          boxShadow: '0 10px 30px 4px #bbb5',
-          height: 'fit-content',
-          overflow: 'hidden',
+          backdropFilter: 'none',
+          background: 'transparent',
+          boxShadow: 'none',
         }}
-      >        <Typography
-          variant="h2"
-          align="center"
-          fontWeight={900}
-          gutterBottom
-          sx={{
-            fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' },
-            letterSpacing: '0.04em',
-            background: 'linear-gradient(120deg,#ff4ecd 40%,#4361ee 70%,#fff 100%)',
-            backgroundClip: 'text',
-            WebkitBackgroundClip: 'text',
-            color: 'transparent',
-            mb: { xs: 1, sm: 2 },
-          }}
         >
-          Name/Logo Previewer
+          <Typography
+            variant="h2"
+            fontWeight={900}
+            gutterBottom
+            sx={{
+              fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.75rem' },
+              letterSpacing: '0.04em',
+              background: 'linear-gradient(120deg,#ff4ecd 40%,#4361ee 70%,#fff 100%)',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              color: 'transparent',
+              mb: { xs: 1, sm: 2 },
+            }}
+          >
+            Name/Logo Previewer
         </Typography>
 
-        <Box // Box for theme and specific selectors
+        <Box
           sx={{
             display: 'flex',
+            flexWrap: 'wrap',
             flexDirection: { xs: 'column', sm: 'row' },
             gap: 2,
             width: '100%',
@@ -308,10 +313,13 @@ export default function App() {
               value={theme}
               label="Theme"
               onChange={(e) => {
-                setTheme(e.target.value)
-                const first = THEMES.find((t) => t.value === e.target.value).options[0].value
-                setSpecific(first)
-                setVariant(first === 'onepiece' ? VARIANTS.onepiece[0].value : '')
+                const newTheme = e.target.value
+                setTheme(newTheme)
+                const themeEntry = THEMES.find((t) => t.value === newTheme)
+                const firstSpecific = themeEntry?.options?.[0]?.value || ''
+                setSpecific(firstSpecific)
+                const defaultVariant = VARIANTS[firstSpecific]?.[0]?.value || ''
+                setVariant(defaultVariant)
               }}
             >
               {THEMES.map((t) => (
@@ -332,7 +340,8 @@ export default function App() {
               onChange={(e) => {
                 const spec = e.target.value
                 setSpecific(spec)
-                setVariant(spec === 'onepiece' ? VARIANTS.onepiece[0].value : '')
+                const defaultVariant = VARIANTS[spec]?.[0]?.value || ''
+                setVariant(defaultVariant)
               }}
             >
               {currentTheme?.options.map((opt) => ( // Optional chaining
@@ -343,7 +352,7 @@ export default function App() {
             </Select>
           </FormControl>
           {/* Variant selector for logos with multiple variants */}
-          {specific === 'onepiece' && (
+          {VARIANTS[specific] && (
             <FormControl fullWidth variant="outlined">
               <InputLabel id="variant-label">Variant</InputLabel>
               <Select
@@ -353,7 +362,7 @@ export default function App() {
                 label="Variant"
                 onChange={(e) => setVariant(e.target.value)}
               >
-                {VARIANTS.onepiece.map((opt) => (
+                {VARIANTS[specific].map((opt) => (
                   <MenuItem key={opt.value} value={opt.value}>
                     {opt.label}
                   </MenuItem>
@@ -374,8 +383,8 @@ export default function App() {
         />
 
         {/* Advanced Options Accordion */}
-        <Box sx={{ width: '100%', mt: 2 }}>
-          <Accordion expanded={showAdvanced} onChange={() => setShowAdvanced(!showAdvanced)} sx={{background: 'rgba(255,255,255,0.8)', boxShadow: 'none', border: '1px solid rgba(0,0,0,0.1)'}}>
+        <Box sx={{ width: '100%' }}>
+          <Accordion expanded={showAdvanced} onChange={() => setShowAdvanced(!showAdvanced)} sx={{ background: 'rgba(255,255,255,0.85)', boxShadow: 'none', border: '1px solid rgba(0,0,0,0.12)' }}>
             <AccordionSummary
               expandIcon={<ExpandMoreIcon />}
               aria-controls="advanced-options-content"
@@ -395,34 +404,39 @@ export default function App() {
               />
             </AccordionDetails>
           </Accordion>
-        </Box>        <Box // Box for canvas/3D preview
+        </Box>
+
+        <Box
           sx={{
             width: '100%',
             display: 'flex',
             justifyContent: 'center',
-            mt: { xs: 1, sm: 2 },
-            border: '1px solid #ccc',
+            border: '1px solid rgba(0,0,0,0.15)',
+            borderRadius: 3,
             overflow: 'hidden',
-            borderRadius: 2,
+            backgroundColor: '#0d0d0d',
             '& canvas': {
-              maxWidth: '100%',
+              width: '100%',
               height: 'auto',
               display: 'block',
+              aspectRatio: `${CANVAS_W} / ${CANVAS_H}`,
             }
           }}
         >
           {/* Always render 2D canvas; 3D preview on hold */}
           <canvas ref={canvasRef} width={CANVAS_W} height={CANVAS_H} />
-        </Box>        <Button
+        </Box>
+
+        <Button
           variant="contained"
           color="primary"
-          sx={{ 
-            mt: { xs: 2, sm: 3 }, 
-            py: { xs: 1, sm: 1.5 }, 
-            px: { xs: 3, sm: 5 }, 
-            fontSize: { xs: '0.9rem', sm: '1.1rem' }, 
-            borderRadius: 3, 
-            fontWeight: 'bold' 
+          sx={{
+            alignSelf: { xs: 'stretch', sm: 'flex-start' },
+            py: { xs: 1, sm: 1.5 },
+            px: { xs: 3, sm: 5 },
+            fontSize: { xs: '0.9rem', sm: '1.1rem' },
+            borderRadius: 3,
+            fontWeight: 'bold'
           }}
           onClick={() => {
             const url = PRODUCT_PAGE_URLS[specific] || 'https://example.com/default-product-page'
@@ -431,17 +445,19 @@ export default function App() {
         >
           Buy Now
         </Button>
-      </Paper>      <Typography
+      </Paper>
+
+      <Typography
         variant="body2"
         color="text.secondary"
         align="center"
-        sx={{ 
-          mt: { xs: 1, sm: 2 }, 
+        sx={{
+          pt: { xs: 1, sm: 2 },
           opacity: 0.7,
           fontSize: { xs: '0.7rem', sm: '0.875rem' }
         }}
       >
-        &copy; {new Date().getFullYear()} Logo Previewer — UI by Material UI.
+        &copy; {new Date().getFullYear()} Logo Previewer - UI by Material UI.
       </Typography>
     </Container>
   )
