@@ -201,6 +201,10 @@ export default function App() {
       };
 
       ctx.setTransform = patchedSetTransform;
+      ctx.__deviceScaleX = scaleX;
+      ctx.__deviceScaleY = scaleY;
+      ctx.__setRawTransform = originalSetTransform;
+      ctx.__applyDefaultTransform = applyDefaultTransform;
 
       try {
         ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
