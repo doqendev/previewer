@@ -162,7 +162,7 @@ export async function drawOnePiece(ctx, text, variant, useCustomBackground, styl
     offCtx.drawImage(boxSource, 0, bxY, textEnd + 45, bxH);
     const imgY = (CANVAS_H - imgHeight) / 2;
     offCtx.drawImage(styleSource, 0, imgY, imgWidth, imgHeight);
-    offCtx.strokeStyle = '#000';
+    offCtx.strokeStyle = variant === 'char13' ? '#ffffff' : '#000';
     for (let { c, x: cx, idx } of charPositions) {
       const scaleY = HEIGHT_ADJ[c] || 1;
       offCtx.save();
