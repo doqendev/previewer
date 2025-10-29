@@ -18,7 +18,9 @@ export async function drawHunterXHunter(ctx, text, useCustomBackground) {
     bg.src = letterCount > 6 ? CUSTOM_BG_SECOND : CUSTOM_BG_MAIN;
     await new Promise((r) => (bg.onload = r));
     ctx.save();
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    const scaleX = ctx.canvas.width / CANVAS_W;
+    const scaleY = ctx.canvas.height / CANVAS_H;
+    ctx.setTransform(scaleX, 0, 0, scaleY, 0, 0);
     ctx.drawImage(bg, 0, 0, CANVAS_W, CANVAS_H);
     ctx.restore();
   }

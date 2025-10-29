@@ -146,6 +146,7 @@ export default function App() {
   const [specific, setSpecific] = useState('naruto')
   const [variant, setVariant] = useState('')
   const canvasRef = useRef(null)
+  const [canvasScale, setCanvasScale] = useState({ scaleX: 1, scaleY: 1 })
   const [showAdvanced, setShowAdvanced] = useState(false);
   // Background image is active by default; toggle to remove it
   const [useCustomBackground, setUseCustomBackground] = useState(true);
@@ -156,9 +157,56 @@ export default function App() {
   const currentSpecific = currentTheme.options.find((o) => o.value === specific)
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const updateScale = () => {
+      if (!canvas) return;
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      const cssWidth = rect.width || CANVAS_W;
+      const cssHeight = rect.height || (cssWidth * CANVAS_H) / CANVAS_W;
+      const scaleX = (cssWidth * dpr) / CANVAS_W;
+      const scaleY = (cssHeight * dpr) / CANVAS_H;
+      const pixelWidth = Math.round(CANVAS_W * scaleX);
+      const pixelHeight = Math.round(CANVAS_H * scaleY);
+
+      if (canvas.width !== pixelWidth) {
+        canvas.width = pixelWidth;
+      }
+      if (canvas.height !== pixelHeight) {
+        canvas.height = pixelHeight;
+      }
+
+      setCanvasScale((prev) => {
+        if (Math.abs(prev.scaleX - scaleX) < 0.001 && Math.abs(prev.scaleY - scaleY) < 0.001) {
+          return prev;
+        }
+        return { scaleX, scaleY };
+      });
+    };
+
+    updateScale();
+
+    const resizeObserver = typeof ResizeObserver !== 'undefined'
+      ? new ResizeObserver(() => updateScale())
+      : null;
+    resizeObserver?.observe(canvas);
+    window.addEventListener('resize', updateScale);
+
+    return () => {
+      resizeObserver?.disconnect();
+      window.removeEventListener('resize', updateScale);
+    };
+  }, []);
+
+  useEffect(() => {
     const draw = async () => {
       const canvas = canvasRef.current; if (!canvas) return;
       const ctx = canvas.getContext('2d');
+      const { scaleX, scaleY } = canvasScale;
+      ctx.setTransform(scaleX, 0, 0, scaleY, 0, 0);
       ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
       // Delegate to specialized previews
       if (theme === 'anime' && specific === 'dragonball') {
@@ -188,8 +236,8 @@ export default function App() {
         const bg = new Image();
         bg.src = letterCount > 6 ? CUSTOM_BG_SECOND : CUSTOM_BG_MAIN;
         await new Promise(r => (bg.onload = r));
-        ctx.save(); 
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.save();
+        ctx.setTransform(scaleX, 0, 0, scaleY, 0, 0);
         ctx.drawImage(bg, 0, 0, CANVAS_W, CANVAS_H);
         ctx.restore();
       }
@@ -251,7 +299,7 @@ export default function App() {
     }
 
     draw()
-  }, [text, theme, specific, currentSpecific?.fontFamily, currentSpecific?.color, variant, useCustomBackground])
+  }, [text, theme, specific, currentSpecific?.fontFamily, currentSpecific?.color, variant, useCustomBackground, canvasScale])
   // Removed dispString as 3D preview is disabled
   return (
     <Container
