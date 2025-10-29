@@ -15,6 +15,7 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  Slider,
 } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { CANVAS_W, CANVAS_H, LOGO_OFFSET_Y, CUSTOM_BG_MAIN, CUSTOM_BG_SECOND, ANIME_OFFSET_Y_NORMAL, ANIME_OFFSET_Y_SMALL, ANIME_SCALE_NORMAL, ANIME_SCALE_SMALL, SHOW_OFFSET_Y_NORMAL, SHOW_OFFSET_Y_SMALL, SHOW_SCALE_NORMAL, SHOW_SCALE_SMALL } from './previewConfig';
@@ -151,6 +152,10 @@ export default function App() {
   const [useCustomBackground, setUseCustomBackground] = useState(true);
   // Vertical offset for all logos; adjust this value in code as needed
   const LOGO_OFFSET_Y = 0;
+  // Allow users to enlarge the preview canvas for better visibility
+  const [previewScale, setPreviewScale] = useState(1.4);
+  const scaledCanvasWidth = Math.round(CANVAS_W * previewScale);
+  const scaledCanvasHeight = Math.round(CANVAS_H * previewScale);
 
   const currentTheme = THEMES.find((t) => t.value === theme)
   const currentSpecific = currentTheme.options.find((o) => o.value === specific)
@@ -331,7 +336,7 @@ export default function App() {
       window.removeEventListener('resize', handleResize);
       ctx.setTransform = defaultSetTransform;
     };
-  }, [text, theme, specific, displayFontFamily, displayColor, variant, useCustomBackground]);
+  }, [text, theme, specific, displayFontFamily, displayColor, variant, useCustomBackground, previewScale]);
   // Removed dispString as 3D preview is disabled
   return (
     <Container
@@ -482,6 +487,26 @@ export default function App() {
                 }
                 label="Remove Background"
               />
+              <Box sx={{ mt: 3 }}>
+                <Typography variant="subtitle2" gutterBottom>
+                  Preview Size
+                </Typography>
+                <Slider
+                  value={previewScale}
+                  onChange={(_, value) => {
+                    if (Array.isArray(value)) return
+                    setPreviewScale(Number(value.toFixed(2)))
+                  }}
+                  min={1}
+                  max={2.5}
+                  step={0.05}
+                  valueLabelDisplay="auto"
+                  valueLabelFormat={(value) => `${Math.round(value * 100)}%`}
+                />
+                <Typography variant="caption" color="text.secondary">
+                  Canvas renders at {scaledCanvasWidth}px × {scaledCanvasHeight}px
+                </Typography>
+              </Box>
             </AccordionDetails>
           </Accordion>
         </Box>
@@ -493,13 +518,13 @@ export default function App() {
             justifyContent: 'center',
             border: '1px solid rgba(0,0,0,0.15)',
             borderRadius: 3,
-            overflow: 'hidden',
+            overflow: 'auto',
             backgroundColor: '#0d0d0d',
             '& canvas': {
-              width: '100%',
-              height: 'auto',
+              width: `${scaledCanvasWidth}px`,
+              height: `${scaledCanvasHeight}px`,
               display: 'block',
-              aspectRatio: `${CANVAS_W} / ${CANVAS_H}`,
+              flex: '0 0 auto',
             }
           }}
         >
