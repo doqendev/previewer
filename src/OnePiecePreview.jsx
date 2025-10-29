@@ -1,6 +1,6 @@
 import { CANVAS_W, CANVAS_H, LOGO_OFFSET_Y, CUSTOM_BG_MAIN, CUSTOM_BG_SECOND, ONEPIECE_STYLE_CONFIGS, ONEPIECE_SCALE_NORMAL, ONEPIECE_SCALE_SMALL, ONEPIECE_OFFSET_Y_NORMAL, ONEPIECE_OFFSET_Y_SMALL } from './previewConfig';
 
-export async function drawOnePiece(ctx, text, variant, useCustomBackground) {
+export async function drawOnePiece(ctx, text, variant, useCustomBackground, styleVariantKey) {
   const currentTransform = typeof ctx.getTransform === 'function' ? ctx.getTransform() : { a: 1, d: 1 };
   const scaleX = ctx.__deviceScaleX || currentTransform.a || 1;
   const scaleY = ctx.__deviceScaleY || currentTransform.d || 1;
@@ -23,10 +23,12 @@ export async function drawOnePiece(ctx, text, variant, useCustomBackground) {
   const renderWidth = Math.max(1, Math.round(CANVAS_W * renderScaleX));
   const renderHeight = Math.max(1, Math.round(CANVAS_H * renderScaleY));
   const smoothingSupported = 'imageSmoothingQuality' in ctx;
+  const forceBlackBackground = variant === 'char13';
+  const shouldUseCustomBackground = useCustomBackground && !forceBlackBackground;
 
   ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
 
-  if (useCustomBackground) {
+  if (shouldUseCustomBackground) {
     const bg = new Image();
     const txtLen = text.replace(/\s/g, '').length;
     bg.src = txtLen > 6 ? CUSTOM_BG_SECOND : CUSTOM_BG_MAIN;
@@ -37,13 +39,26 @@ export async function drawOnePiece(ctx, text, variant, useCustomBackground) {
     if (smoothingSupported) ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(bg, 0, 0, deviceWidth, deviceHeight);
     ctx.restore();
+  } else if (forceBlackBackground) {
+    ctx.save();
+    setIdentityTransform();
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, deviceWidth, deviceHeight);
+    ctx.restore();
   }
 
   const txt = text.toUpperCase().substring(0, 12);
   await document.fonts.load('bold 50px ONEPIECE_IL_FINAL');
   const cfg = ONEPIECE_STYLE_CONFIGS[variant] || ONEPIECE_STYLE_CONFIGS.char1;
-  const primaryColor = cfg.defaultSecondaryColor;
-  const secondaryColor = cfg.defaultPrimaryColor;
+  const styleVariantOptions = cfg.styleVariants || [];
+  const fallbackVariant = styleVariantOptions.find((opt) => opt.value === cfg.defaultStyleVariant) || styleVariantOptions[0];
+  const activeStyleVariant = styleVariantOptions.find((opt) => opt.value === styleVariantKey) || fallbackVariant || null;
+  const activeStyleImage = activeStyleVariant?.styleImage || cfg.defaultStyleImage;
+  const primaryColor = activeStyleVariant?.secondaryColor || cfg.defaultSecondaryColor;
+  const secondaryColor = activeStyleVariant?.primaryColor || cfg.defaultPrimaryColor;
+  const effectiveStyleScale = activeStyleVariant?.styleScale ?? cfg.styleScale ?? 1;
+  const effectiveStyleWidthScale = activeStyleVariant?.styleWidthScale ?? cfg.styleWidthScale;
+  const effectiveKeepAspectRatio = activeStyleVariant?.keepAspectRatio ?? cfg.keepAspectRatio;
   const maxFontSize = Math.min(400, CANVAS_H * 0.5);
   const baseFontSize = txt.length > 11 ? maxFontSize * 0.7 : maxFontSize;
   const fontSize = baseFontSize;
@@ -57,11 +72,11 @@ export async function drawOnePiece(ctx, text, variant, useCustomBackground) {
   if ('imageSmoothingQuality' in offCtx) offCtx.imageSmoothingQuality = 'high';
   offCtx.scale(renderScaleX, renderScaleY);
 
-  if (!useCustomBackground) {
-    offCtx.fillStyle = '#fff';
-    offCtx.fillRect(0, 0, CANVAS_W, CANVAS_H);
-  } else {
+  if (shouldUseCustomBackground) {
     offCtx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+  } else {
+    offCtx.fillStyle = forceBlackBackground ? '#000000' : '#fff';
+    offCtx.fillRect(0, 0, CANVAS_W, CANVAS_H);
   }
 
   const boxImg = new Image();
@@ -70,19 +85,18 @@ export async function drawOnePiece(ctx, text, variant, useCustomBackground) {
   const bxH = (425 / 800) * CANVAS_H;
   const bxY = CANVAS_H - bxH - (160 / 800) * CANVAS_H;
   const mainH = CANVAS_H * 0.5;
-  const styleScale = cfg.styleScale ?? 1;
-  let imgHeight = mainH * styleScale;
+  let imgHeight = mainH * effectiveStyleScale;
   let imgWidth;
   const styleImg = new Image();
-  styleImg.src = new URL(`./assets/${cfg.defaultStyleImage}`, import.meta.url).href;
+  styleImg.src = new URL(`./assets/${activeStyleImage}`, import.meta.url).href;
   await new Promise(r => (styleImg.onload = r));
-  if (cfg.keepAspectRatio) {
+  if (effectiveKeepAspectRatio) {
     const naturalWidth = styleImg.naturalWidth || styleImg.width || 1;
     const naturalHeight = styleImg.naturalHeight || styleImg.height || 1;
     const aspectRatio = naturalHeight > 0 ? naturalWidth / naturalHeight : 1;
     imgWidth = imgHeight * aspectRatio;
   } else {
-    const widthScale = cfg.styleWidthScale ?? styleScale;
+    const widthScale = effectiveStyleWidthScale ?? effectiveStyleScale;
     imgWidth = mainH * widthScale;
   }
 

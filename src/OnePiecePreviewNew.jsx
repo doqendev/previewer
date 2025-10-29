@@ -16,7 +16,7 @@ const FONT_BOOST = 1.08;
 const STYLE_HEIGHT_RATIO = 0.58;
 const SHADOW_INTENSITY = 1.15;
 
-export async function drawOnePieceNew(ctx, text, variant, useCustomBackground) {
+export async function drawOnePieceNew(ctx, text, variant, useCustomBackground, styleVariantKey) {
   const baseWidth = CANVAS_W;
   const baseHeight = CANVAS_H;
 
@@ -44,8 +44,15 @@ export async function drawOnePieceNew(ctx, text, variant, useCustomBackground) {
   const txt = text.toUpperCase().substring(0, 12);
   await document.fonts.load(`bold ${Math.round(50 * FONT_BOOST)}px ONEPIECE_IL_FINAL`);
   const cfg = ONEPIECE_STYLE_CONFIGS[variant] || ONEPIECE_STYLE_CONFIGS.char1;
-  const primaryColor = cfg.defaultSecondaryColor;
-  const secondaryColor = cfg.defaultPrimaryColor;
+  const styleVariantOptions = cfg.styleVariants || [];
+  const fallbackVariant = styleVariantOptions.find((opt) => opt.value === cfg.defaultStyleVariant) || styleVariantOptions[0];
+  const activeStyleVariant = styleVariantOptions.find((opt) => opt.value === styleVariantKey) || fallbackVariant || null;
+  const activeStyleImage = activeStyleVariant?.styleImage || cfg.defaultStyleImage;
+  const primaryColor = activeStyleVariant?.secondaryColor || cfg.defaultSecondaryColor;
+  const secondaryColor = activeStyleVariant?.primaryColor || cfg.defaultPrimaryColor;
+  const effectiveStyleScale = activeStyleVariant?.styleScale ?? cfg.styleScale ?? 1;
+  const effectiveStyleWidthScale = activeStyleVariant?.styleWidthScale ?? cfg.styleWidthScale ?? cfg.styleScale;
+  const effectiveKeepAspectRatio = activeStyleVariant?.keepAspectRatio ?? cfg.keepAspectRatio;
   const maxFontSize = Math.min(450, baseHeight * 0.6) * FONT_BOOST;
   const baseFontSize = txt.length > 11 ? maxFontSize * 0.72 : maxFontSize;
   const fontSize = baseFontSize;
@@ -68,22 +75,22 @@ export async function drawOnePieceNew(ctx, text, variant, useCustomBackground) {
   await new Promise(r => (boxImg.onload = r));
 
   const styleImg = new Image();
-  styleImg.src = new URL(`./assets/${cfg.defaultStyleImage}`, import.meta.url).href;
+  styleImg.src = new URL(`./assets/${activeStyleImage}`, import.meta.url).href;
   await new Promise(r => (styleImg.onload = r));
 
   const bxH = (450 / 800) * baseHeight;
   const bxY = baseHeight - bxH - (130 / 800) * baseHeight;
-  const mainH = baseHeight * STYLE_HEIGHT_RATIO * (cfg.styleScale ?? 1);
+  const mainH = baseHeight * STYLE_HEIGHT_RATIO * effectiveStyleScale;
 
   let imgHeight = mainH;
   let imgWidth;
-  if (cfg.keepAspectRatio) {
+  if (effectiveKeepAspectRatio) {
     const naturalWidth = styleImg.naturalWidth || styleImg.width || 1;
     const naturalHeight = styleImg.naturalHeight || styleImg.height || 1;
     const aspectRatio = naturalHeight > 0 ? naturalWidth / naturalHeight : 1;
     imgWidth = imgHeight * aspectRatio;
   } else {
-    const widthScale = (cfg.styleWidthScale ?? cfg.styleScale ?? 1) * 1.05;
+    const widthScale = (effectiveStyleWidthScale ?? 1) * 1.05;
     imgWidth = baseHeight * widthScale * 0.55;
   }
 

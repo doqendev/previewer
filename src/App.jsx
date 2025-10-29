@@ -20,10 +20,9 @@ import {
   Slider,
 } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { CANVAS_W, CANVAS_H, LOGO_OFFSET_Y, CUSTOM_BG_MAIN, CUSTOM_BG_SECOND, ANIME_OFFSET_Y_NORMAL, ANIME_OFFSET_Y_SMALL, ANIME_SCALE_NORMAL, ANIME_SCALE_SMALL, SHOW_OFFSET_Y_NORMAL, SHOW_OFFSET_Y_SMALL, SHOW_SCALE_NORMAL, SHOW_SCALE_SMALL } from './previewConfig';
+import { CANVAS_W, CANVAS_H, LOGO_OFFSET_Y, CUSTOM_BG_MAIN, CUSTOM_BG_SECOND, ANIME_OFFSET_Y_NORMAL, ANIME_OFFSET_Y_SMALL, ANIME_SCALE_NORMAL, ANIME_SCALE_SMALL, SHOW_OFFSET_Y_NORMAL, SHOW_OFFSET_Y_SMALL, SHOW_SCALE_NORMAL, SHOW_SCALE_SMALL, ONEPIECE_STYLE_CONFIGS } from './previewConfig';
 import { drawDragonBall } from './DragonBallPreview.jsx';
 import { drawOnePiece } from './OnePiecePreview.jsx';
-import { drawOnePieceNew } from './OnePiecePreviewNew.jsx';
 import { drawBand } from './BandPreview.jsx';
 import { drawHunterXHunter } from './HunterXHunterPreview.jsx';
 
@@ -47,7 +46,6 @@ const THEMES = [
     options: [
       { label: 'Naruto', value: 'naruto', fontFamily: 'AnimeFont', color: '#ff9900' },
       { label: 'One Piece', value: 'onepiece', fontFamily: 'AnimeFont', color: '#0099ff' },
-      { label: 'One Piece (New)', value: 'onepiece-new', fontFamily: 'AnimeFont', color: '#0099ff' },
       { label: 'Dragon Ball', value: 'dragonball', fontFamily: 'db', color: '#fbc2eb' },
       { label: 'Hunter x Hunter', value: 'hxh', fontFamily: 'PLZ', color: '#c60000' },
     ],
@@ -99,38 +97,12 @@ const ONEPIECE_VARIANTS = [
 
 const VARIANTS = {
   onepiece: ONEPIECE_VARIANTS,
-  'onepiece-new': ONEPIECE_VARIANTS,
-}
-
-// Style configuration for One Piece character variants
-const ONEPIECE_STYLE_CONFIGS = {
-  char1: { boxFilename: 'box_luffy.png', defaultStyleImage: 'style_1.png', defaultPrimaryColor: '#dc2526', defaultSecondaryColor: '#0077f1', styleScale: 1.1 },
-  char2: { boxFilename: 'box_green.png', defaultStyleImage: 'style_2.png', defaultPrimaryColor: '#f4ed00', defaultSecondaryColor: '#2ab100', styleScale: 1.1  },
-  char3: { boxFilename: 'box_orange.png', defaultStyleImage: 'style_3.svg', defaultPrimaryColor: '#c80000', defaultSecondaryColor: '#e06f00', styleScale: 1.1 },
-  char4: { boxFilename: 'box_pink.png', defaultStyleImage: 'style_4.png', defaultPrimaryColor: '#ffffff', defaultSecondaryColor: '#f003ff', styleScale: 1.2 },
-  char5: { boxFilename: 'box_yellow.png', defaultStyleImage: 'style_5.png', defaultPrimaryColor: '#ffffff', defaultSecondaryColor: '#f9da06' },
-  char6: { boxFilename: 'box_red.png', defaultStyleImage: 'style_6.png', defaultPrimaryColor: '#ffffff', defaultSecondaryColor: '#f30011', styleScale: 1.3 },
-  char7: { boxFilename: 'box_nami.png', defaultStyleImage: 'style_7.png', defaultPrimaryColor: '#f47301', defaultSecondaryColor: '#00c892', styleScale: 1.2 },
-  char8: { boxFilename: 'box.png', defaultStyleImage: 'style_8.png', defaultPrimaryColor: '#f9da06', defaultSecondaryColor: '#0077f1', styleScale: 1.15 },
-  char9: { boxFilename: 'box_purple.png', defaultStyleImage: 'style_9.png', defaultPrimaryColor: '#FF0000', defaultSecondaryColor: '#6803ff', styleScale: 1.1 },
-  char10: { boxFilename: 'box_yellow.png', defaultStyleImage: 'style_10.png', defaultPrimaryColor: '#a2a2a2', defaultSecondaryColor: '#e8da00', styleScale: 1.2 },
-  char11: { boxFilename: 'box_grey.png', defaultStyleImage: 'style_11.png', defaultPrimaryColor: '#e8da00', defaultSecondaryColor: '#a2a2a2', styleScale: 1.2 },
-  char12: { boxFilename: 'box_tropa.png', defaultStyleImage: 'style_12.png', defaultPrimaryColor: '#ffffff', defaultSecondaryColor: '#48620c', styleScale: 1.2 },
-  char13: { boxFilename: 'box_boa.png', defaultStyleImage: 'style_13.png', defaultPrimaryColor: '#ff0000', defaultSecondaryColor: '#000000', styleScale: 1.2  },
-  char14: { boxFilename: 'box_junbe.png', defaultStyleImage: 'style_14_k.png', defaultPrimaryColor: '#ff0000', defaultSecondaryColor: '#50aefe', styleScale: 1.1  },
-  char15: { boxFilename: 'box_purple.png', defaultStyleImage: 'style_15.png', defaultPrimaryColor: '#ffffff', defaultSecondaryColor: '#6803ff', styleScale: 1.2, styleWidthScale: 1.5  },
-  char16: { boxFilename: 'box_purple.png', defaultStyleImage: 'style_16.png', defaultPrimaryColor: '#ffffff', defaultSecondaryColor: '#6803ff', styleScale: 1.1  },
-  char17: { boxFilename: 'box_barbagrande.png', defaultStyleImage: 'style_17.png', defaultPrimaryColor: '#ffffff', defaultSecondaryColor: '#850101', styleScale: 1.2 , styleWidthScale: 1.5 },
-  char18: { boxFilename: 'box_red.png', defaultStyleImage: 'style_18.png', defaultPrimaryColor: '#ffffff', defaultSecondaryColor: '#ff0000', styleScale: 1.1  },
-  char19: { boxFilename: 'box_red.png', defaultStyleImage: 'style_19.png', defaultPrimaryColor: '#ffffff', defaultSecondaryColor: '#ff0000', styleScale: 0.95, keepAspectRatio: true },
-  char20: { boxFilename: 'box_red.png', defaultStyleImage: 'style_20.png', defaultPrimaryColor: '#ffff00', defaultSecondaryColor: '#ff0000', styleScale: 0.9, keepAspectRatio: true },
 }
 
 // Mapping of themespecific styles to product page URLs
 const PRODUCT_PAGE_URLS = {
   naruto: 'https://example.com/naruto-logo',
   onepiece: 'https://www.weletyoucook.com/product-page/anime-custom-desksign',
-  'onepiece-new': 'https://www.weletyoucook.com/product-page/anime-custom-desksign',
   dragonball: 'https://example.com/dragon-ball-logo',
   hxh: 'https://example.com/hunter-x-hunter-logo',
   metallica: 'https://example.com/metallica-logo',
@@ -158,12 +130,34 @@ export default function App() {
   const [previewScale, setPreviewScale] = useState(1.8);
   const scaledCanvasWidth = Math.round(CANVAS_W * previewScale);
   const scaledCanvasHeight = Math.round(CANVAS_H * previewScale);
+  const [styleVariant, setStyleVariant] = useState('');
 
   const currentTheme = THEMES.find((t) => t.value === theme)
   const currentSpecific = currentTheme.options.find((o) => o.value === specific)
   const displayFontFamily = currentSpecific?.fontFamily || 'AnimeFont'
   const displayColor = currentSpecific?.color || '#ffffff'
+  const isOnePieceSpecific = specific === 'onepiece'
+  const styleVariantOptions = isOnePieceSpecific && variant
+    ? (ONEPIECE_STYLE_CONFIGS[variant]?.styleVariants || [])
+    : []
+  const hasStyleVariant = styleVariantOptions.length > 0
   const hasVariant = Boolean(VARIANTS[specific])
+  const columnSpan = (hasVariant || hasStyleVariant) ? 4 : 6
+
+  useEffect(() => {
+    if (!isOnePieceSpecific) {
+      setStyleVariant('')
+      return
+    }
+    const variantConfig = variant ? ONEPIECE_STYLE_CONFIGS[variant] : undefined
+    const options = variantConfig?.styleVariants || []
+    if (options.length === 0) {
+      setStyleVariant('')
+      return
+    }
+    const defaultOption = options.find(opt => opt.value === variantConfig?.defaultStyleVariant) || options[0]
+    setStyleVariant((prev) => (prev && options.some(opt => opt.value === prev) ? prev : defaultOption.value))
+  }, [isOnePieceSpecific, variant])
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -224,11 +218,7 @@ export default function App() {
           return;
         }
         if (theme === 'anime' && specific === 'onepiece') {
-          await drawOnePiece(ctx, text, variant, useCustomBackground);
-          return;
-        }
-        if (theme === 'anime' && specific === 'onepiece-new') {
-          await drawOnePieceNew(ctx, text, variant, useCustomBackground);
+          await drawOnePiece(ctx, text, variant, useCustomBackground, styleVariant);
           return;
         }
         if (theme === 'anime' && specific === 'hxh') {
@@ -291,7 +281,7 @@ export default function App() {
         ctx.translate(offsetX, offsetY);
         ctx.scale(scale, scale);
 
-        if (!(theme === 'anime' && (specific === 'onepiece' || specific === 'onepiece-new'))) {
+        if (!(theme === 'anime' && specific === 'onepiece')) {
           ctx.save();
           ctx.font = `bold 70px ${displayFontFamily}, sans-serif`;
           ctx.textAlign = 'center';
@@ -339,7 +329,7 @@ export default function App() {
       window.removeEventListener('resize', handleResize);
       ctx.setTransform = defaultSetTransform;
     };
-  }, [text, theme, specific, displayFontFamily, displayColor, variant, useCustomBackground, previewScale]);
+  }, [text, theme, specific, displayFontFamily, displayColor, variant, useCustomBackground, previewScale, styleVariant]);
   // Removed dispString as 3D preview is disabled
   return (
     <Container
@@ -394,7 +384,7 @@ export default function App() {
           </Typography>
 
           <Grid container spacing={2} alignItems="flex-end">
-            <Grid item xs={12} md={hasVariant ? 4 : 6}>
+            <Grid item xs={12} md={columnSpan}>
               <FormControl fullWidth variant="outlined">
                 <InputLabel id="theme-label">Theme</InputLabel>
                 <Select
@@ -421,7 +411,7 @@ export default function App() {
               </FormControl>
             </Grid>
 
-            <Grid item xs={12} md={hasVariant ? 4 : 6}>
+            <Grid item xs={12} md={columnSpan}>
               <FormControl fullWidth variant="outlined">
                 <InputLabel id="specific-label">{currentTheme?.label}</InputLabel>
                 <Select
@@ -457,6 +447,27 @@ export default function App() {
                     onChange={(e) => setVariant(e.target.value)}
                   >
                     {VARIANTS[specific].map((opt) => (
+                      <MenuItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+            )}
+
+            {hasStyleVariant && (
+              <Grid item xs={12} md={4}>
+                <FormControl fullWidth variant="outlined">
+                  <InputLabel id="style-variant-label">Style</InputLabel>
+                  <Select
+                    labelId="style-variant-label"
+                    id="style-variant-select"
+                    value={styleVariant}
+                    label="Style"
+                    onChange={(e) => setStyleVariant(e.target.value)}
+                  >
+                    {styleVariantOptions.map((opt) => (
                       <MenuItem key={opt.value} value={opt.value}>
                         {opt.label}
                       </MenuItem>
