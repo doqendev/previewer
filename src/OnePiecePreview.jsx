@@ -16,6 +16,12 @@ export async function drawOnePiece(ctx, text, variant, useCustomBackground) {
   };
   const deviceWidth = Math.max(1, Math.round(CANVAS_W * scaleX));
   const deviceHeight = Math.max(1, Math.round(CANVAS_H * scaleY));
+  const maxDeviceScale = Math.max(scaleX, scaleY);
+  const oversample = maxDeviceScale >= 2 ? 1 : 2;
+  const renderScaleX = scaleX * oversample;
+  const renderScaleY = scaleY * oversample;
+  const renderWidth = Math.max(1, Math.round(CANVAS_W * renderScaleX));
+  const renderHeight = Math.max(1, Math.round(CANVAS_H * renderScaleY));
   const smoothingSupported = 'imageSmoothingQuality' in ctx;
 
   ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
@@ -43,13 +49,13 @@ export async function drawOnePiece(ctx, text, variant, useCustomBackground) {
   const fontSize = baseFontSize;
 
   const off = document.createElement('canvas');
-  off.width = deviceWidth;
-  off.height = deviceHeight;
+  off.width = renderWidth;
+  off.height = renderHeight;
   const offCtx = off.getContext('2d');
   if (!offCtx) return;
   offCtx.imageSmoothingEnabled = true;
   if ('imageSmoothingQuality' in offCtx) offCtx.imageSmoothingQuality = 'high';
-  offCtx.scale(scaleX, scaleY);
+  offCtx.scale(renderScaleX, renderScaleY);
 
   if (!useCustomBackground) {
     offCtx.fillStyle = '#fff';
@@ -78,6 +84,19 @@ export async function drawOnePiece(ctx, text, variant, useCustomBackground) {
   } else {
     const widthScale = cfg.styleWidthScale ?? styleScale;
     imgWidth = mainH * widthScale;
+  }
+
+  let styleSource = styleImg;
+  if (typeof createImageBitmap === 'function') {
+    try {
+      styleSource = await createImageBitmap(styleImg, {
+        resizeWidth: Math.max(1, Math.round(imgWidth * renderScaleX)),
+        resizeHeight: Math.max(1, Math.round(imgHeight * renderScaleY)),
+        resizeQuality: 'high',
+      });
+    } catch (_) {
+      styleSource = styleImg;
+    }
   }
 
   offCtx.font = `${fontSize}px ONEPIECE_IL_FINAL`;
@@ -114,9 +133,21 @@ export async function drawOnePiece(ctx, text, variant, useCustomBackground) {
     const startX = (CANVAS_W - textEnd) / 2;
     offCtx.save();
     offCtx.translate(startX, 0);
-    offCtx.drawImage(boxImg, 0, bxY, textEnd + 45, bxH);
+    let boxSource = boxImg;
+    if (typeof createImageBitmap === 'function') {
+      try {
+        boxSource = await createImageBitmap(boxImg, {
+          resizeWidth: Math.max(1, Math.round((textEnd + 45) * renderScaleX)),
+          resizeHeight: Math.max(1, Math.round(bxH * renderScaleY)),
+          resizeQuality: 'high',
+        });
+      } catch (_) {
+        boxSource = boxImg;
+      }
+    }
+    offCtx.drawImage(boxSource, 0, bxY, textEnd + 45, bxH);
     const imgY = (CANVAS_H - imgHeight) / 2;
-    offCtx.drawImage(styleImg, 0, imgY, imgWidth, imgHeight);
+    offCtx.drawImage(styleSource, 0, imgY, imgWidth, imgHeight);
     offCtx.strokeStyle = '#000';
     for (let { c, x: cx, idx } of charPositions) {
       const scaleY = HEIGHT_ADJ[c] || 1;
@@ -129,7 +160,13 @@ export async function drawOnePiece(ctx, text, variant, useCustomBackground) {
       offCtx.fillText(c, cx, yMid);
       offCtx.restore();
     }
+    if (boxSource !== boxImg && typeof boxSource.close === 'function') {
+      boxSource.close();
+    }
     offCtx.restore();
+  }
+  if (styleSource !== styleImg && typeof styleSource.close === 'function') {
+    styleSource.close();
   }
 
   const shadowOff = document.createElement('canvas');
@@ -145,8 +182,8 @@ export async function drawOnePiece(ctx, text, variant, useCustomBackground) {
   extruded.width = off.width;
   extruded.height = off.height;
   const eCtx = extruded.getContext('2d');
-  const baseThickness = Math.max(1, Math.round((8 / 800) * CANVAS_H));
-  const thickness = Math.max(1, Math.round(baseThickness * Math.max(scaleX, scaleY)));
+  const baseThickness = (8 / 800) * CANVAS_H;
+  const thickness = Math.max(1, Math.round(baseThickness * Math.max(renderScaleX, renderScaleY)));
   for (let i = 0; i < thickness; i++) {
     eCtx.drawImage(shadowOff, i, i);
   }
@@ -160,8 +197,8 @@ export async function drawOnePiece(ctx, text, variant, useCustomBackground) {
   const totalOffsetY = LOGO_OFFSET_Y + offsetY;
   const deviceOffsetX = totalOffsetX * scaleX;
   const deviceOffsetY = totalOffsetY * scaleY;
-  const destWidth = extruded.width * scaleFactor;
-  const destHeight = extruded.height * scaleFactor;
+  const destWidth = Math.max(1, Math.round((extruded.width * scaleFactor) / oversample));
+  const destHeight = Math.max(1, Math.round((extruded.height * scaleFactor) / oversample));
   const avgScale = Math.max(scaleX, scaleY);
 
   ctx.save();
